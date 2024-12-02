@@ -18,8 +18,8 @@ func (us *UpdaterService) StartNATSConnectJob(queueSubscribe func() error) error
 	if err != nil {
 		return err
 	}
-	clientCert := filepath.Join(cwd, "certificates", "agent.cer")
-	clientKey := filepath.Join(cwd, "certificates", "agent.key")
+	clientCert := filepath.Join(cwd, "certificates", "updates", "updater.cer")
+	clientKey := filepath.Join(cwd, "certificates", "updates", "updater.key")
 	caCert := filepath.Join(cwd, "certificates", "ca.cer")
 
 	us.NATSConnection, err = openuem_nats.ConnectWithNATS(us.NATSServers, clientCert, clientKey, caCert)
