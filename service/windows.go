@@ -14,7 +14,6 @@ import (
 
 	"github.com/doncicuto/openuem_nats"
 	"github.com/doncicuto/openuem_utils"
-	"github.com/google/uuid"
 	"github.com/nats-io/nats.go/jetstream"
 	"golang.org/x/sys/windows/registry"
 	"golang.org/x/sys/windows/svc"
@@ -47,6 +46,11 @@ func (us *UpdaterService) StopWindowsService() {
 func (us *UpdaterService) queueSubscribeForWindows() error {
 	var ctx context.Context
 
+	hostname, err := os.Hostname()
+	if err != nil {
+		return err
+	}
+
 	js, err := jetstream.New(us.NATSConnection)
 	if err != nil {
 		log.Printf("[ERROR]: could not instantiate JetStream: %s", err.Error())
@@ -56,14 +60,14 @@ func (us *UpdaterService) queueSubscribeForWindows() error {
 
 	ctx, us.JetstreamContextCancel = context.WithTimeout(context.Background(), 60*time.Minute)
 	s, err := js.CreateOrUpdateStream(ctx, jetstream.StreamConfig{
-		Name:     "SERVER_UPDATER_STREAM_" + us.UUID,
-		Subjects: []string{"server.update." + us.UUID, "server.rollback." + us.UUID},
+		Name:     "SERVER_UPDATER_STREAM_" + hostname,
+		Subjects: []string{"server.update." + hostname, "server.rollback." + hostname},
 	})
 	if err != nil {
-		log.Printf("[ERROR]: could not create stream SERVER_UPDATER_STREAM_%s: %v\n", us.UUID, err)
+		log.Printf("[ERROR]: could not create stream SERVER_UPDATER_STREAM_%s: %v\n", hostname, err)
 		return err
 	}
-	log.Printf("[INFO]: SERVER_UPDATER_STREAM_%s stream has been created or updated", us.UUID)
+	log.Printf("[INFO]: SERVER_UPDATER_STREAM_%s stream has been created or updated", hostname)
 
 	c1, err := s.CreateOrUpdateConsumer(ctx, jetstream.ConsumerConfig{
 		AckPolicy: jetstream.AckExplicitPolicy,
@@ -78,13 +82,18 @@ func (us *UpdaterService) queueSubscribeForWindows() error {
 	}))
 
 	log.Println("[INFO]: Jetstream created and started consuming messages")
-	log.Println("[INFO]: subscribed to message ", "server.update."+us.UUID)
-	log.Println("[INFO]: subscribed to message ", "server.rollback."+us.UUID)
+	log.Println("[INFO]: subscribed to message ", "server.update."+hostname)
+	log.Println("[INFO]: subscribed to message ", "server.rollback."+hostname)
 
 	return nil
 }
 
 func (us *UpdaterService) JetStreamUpdaterHandler(msg jetstream.Msg) {
+	hostname, err := os.Hostname()
+	if err != nil {
+		return
+	}
+
 	// Unmarshal msg data
 	data := openuem_nats.OpenUEMServerRelease{}
 	if err := json.Unmarshal(msg.Data(), &data); err != nil {
@@ -93,7 +102,7 @@ func (us *UpdaterService) JetStreamUpdaterHandler(msg jetstream.Msg) {
 		return
 	}
 
-	if msg.Subject() == fmt.Sprintf("server.update.%s", us.UUID) {
+	if msg.Subject() == fmt.Sprintf("server.update.%s", hostname) {
 		if us.HasComponent("nats") {
 			us.ComponentUpdate(data, "openuem-nats-service")
 		}
@@ -123,7 +132,7 @@ func (us *UpdaterService) JetStreamUpdaterHandler(msg jetstream.Msg) {
 		}
 	}
 
-	if msg.Subject() == fmt.Sprintf("server.rollback.%s", us.UUID) {
+	if msg.Subject() == fmt.Sprintf("server.rollback.%s", hostname) {
 		if us.HasComponent("nats") {
 			us.ComponentRollback("openuem-nats-service")
 		}
@@ -167,29 +176,6 @@ func (us *UpdaterService) ReadWindowsConfig() error {
 	us.NATSServers, err = openuem_utils.GetValueFromRegistry(k, "NATSServers")
 	if err != nil {
 		return fmt.Errorf("could not read NATS servers from registry")
-	}
-
-	us.UUID, err = openuem_utils.GetValueFromRegistry(k, "UUID")
-	if err != nil {
-		return fmt.Errorf("could not read NATS servers from registry")
-	}
-
-	us.DBUrl, err = openuem_utils.CreatePostgresDatabaseURL()
-	if err != nil {
-		log.Printf("[ERROR]: %v", err)
-		return err
-	}
-	k.Close()
-
-	k, err = registry.OpenKey(registry.LOCAL_MACHINE, `SOFTWARE\OpenUEM\Server`, registry.QUERY_VALUE|registry.SET_VALUE)
-	if err != nil {
-		log.Println("[ERROR]: cannot read the server hive")
-		return err
-	}
-	defer k.Close()
-
-	if us.UUID == "" {
-		k.SetStringValue("UUID", uuid.NewString())
 	}
 
 	return nil

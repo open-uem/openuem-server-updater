@@ -11,8 +11,6 @@ import (
 const NATS_TOKEN = "OpenUEM"
 
 type UpdaterService struct {
-	UUID                   string
-	DBUrl                  string
 	NATSConnection         *nats.Conn
 	NATSConnectJob         gocron.Job
 	WatchdogJob            gocron.Job
@@ -25,7 +23,7 @@ type UpdaterService struct {
 func NewUpdateService() (*UpdaterService, error) {
 	var err error
 	us := UpdaterService{}
-	us.Logger = openuem_utils.NewLogger("openuem-updater-service.txt")
+	us.Logger = openuem_utils.NewLogger("openuem-server-updater.txt")
 
 	us.TaskScheduler, err = gocron.NewScheduler()
 	if err != nil {
