@@ -63,7 +63,7 @@ func (us *UpdaterService) queueSubscribeForWindows() error {
 	ctx, us.JetstreamContextCancel = context.WithTimeout(context.Background(), 60*time.Minute)
 	s, err := js.CreateOrUpdateStream(ctx, jetstream.StreamConfig{
 		Name:     "SERVER_UPDATER_STREAM_" + hostname,
-		Subjects: []string{"server.update." + hostname, "server.rollback." + hostname},
+		Subjects: []string{"nats.update." + hostname, "nats.rollback." + hostname, "console.update." + hostname, "console.rollback." + hostname, "agent-worker.update." + hostname, "agent-worker.rollback." + hostname, "cert-manager-worker.update." + hostname, "cert-manager-worker.rollback." + hostname, "notification-worker.update." + hostname, "notification-worker.rollback." + hostname, "ocsp.update." + hostname, "ocsp.rollback." + hostname, "cert-manager.update." + hostname, "cert-manager.rollback." + hostname},
 	})
 	if err != nil {
 		log.Printf("[ERROR]: could not create stream SERVER_UPDATER_STREAM_%s: %v\n", hostname, err)
@@ -121,7 +121,7 @@ func (us *UpdaterService) JetStreamUpdaterHandler(msg jetstream.Msg) {
 	defer model.Close()
 
 	if msg.Subject() == fmt.Sprintf("server.update.%s", hostname) {
-		if us.HasComponent("nats") {
+		if us.HasComponent("nats") && msg.Subject() == "nats.update."+hostname {
 			if err := us.ComponentUpdate(data, "openuem-nats-service"); err != nil {
 				log.Printf("[ERROR]: could not update %s, reason: %v", "openuem-nats-service", err)
 				if err := model.UpdateComponent(component.ComponentNats, data.Version, component.Channel(data.Channel), component.UpdateStatusError, err.Error()); err != nil {
@@ -133,7 +133,7 @@ func (us *UpdaterService) JetStreamUpdaterHandler(msg jetstream.Msg) {
 			}
 		}
 
-		if us.HasComponent("ocsp") {
+		if us.HasComponent("ocsp") && msg.Subject() == "ocsp.update."+hostname {
 			if err := us.ComponentUpdate(data, "openuem-ocsp-responder"); err != nil {
 				log.Printf("[ERROR]: could not update %s, reason: %v", "openuem-ocsp-responder", err)
 				if err := model.UpdateComponent(component.ComponentOcsp, data.Version, component.Channel(data.Channel), component.UpdateStatusError, err.Error()); err != nil {
@@ -145,7 +145,7 @@ func (us *UpdaterService) JetStreamUpdaterHandler(msg jetstream.Msg) {
 			}
 		}
 
-		if us.HasComponent("console") {
+		if us.HasComponent("console") && msg.Subject() == "console.update."+hostname {
 			if err := us.ComponentUpdate(data, "openuem-console-service"); err != nil {
 				log.Printf("[ERROR]: could not update %s, reason: %v", "openuem-console-service", err)
 				if err := model.UpdateComponent(component.ComponentConsole, data.Version, component.Channel(data.Channel), component.UpdateStatusError, err.Error()); err != nil {
@@ -157,7 +157,7 @@ func (us *UpdaterService) JetStreamUpdaterHandler(msg jetstream.Msg) {
 			}
 		}
 
-		if us.HasComponent("agent-worker") {
+		if us.HasComponent("agent-worker") && msg.Subject() == "agent-worker.update."+hostname {
 			if err := us.ComponentUpdate(data, "openuem-agent-worker"); err != nil {
 				log.Printf("[ERROR]: could not update %s, reason: %v", "openuem-agent-worker", err)
 				if err := model.UpdateComponent(component.ComponentAgentWorker, data.Version, component.Channel(data.Channel), component.UpdateStatusError, err.Error()); err != nil {
@@ -169,7 +169,7 @@ func (us *UpdaterService) JetStreamUpdaterHandler(msg jetstream.Msg) {
 			}
 		}
 
-		if us.HasComponent("notification-worker") {
+		if us.HasComponent("notification-worker") && msg.Subject() == "notification-worker.update."+hostname {
 			if err := us.ComponentUpdate(data, "openuem-notification-worker"); err != nil {
 				log.Printf("[ERROR]: could not update %s, reason: %v", "notification-worker", err)
 				if err := model.UpdateComponent(component.ComponentNotificationWorker, data.Version, component.Channel(data.Channel), component.UpdateStatusError, err.Error()); err != nil {
@@ -181,7 +181,7 @@ func (us *UpdaterService) JetStreamUpdaterHandler(msg jetstream.Msg) {
 			}
 		}
 
-		if us.HasComponent("cert-manager-worker") {
+		if us.HasComponent("cert-manager-worker") && msg.Subject() == "cert-manager-worker.update."+hostname {
 			if err := us.ComponentUpdate(data, "openuem-cert-manager-worker"); err != nil {
 				log.Printf("[ERROR]: could not update %s, reason: %v", "cert-manager-worker", err)
 				if err := model.UpdateComponent(component.ComponentCertManagerWorker, data.Version, component.Channel(data.Channel), component.UpdateStatusError, err.Error()); err != nil {
@@ -193,7 +193,7 @@ func (us *UpdaterService) JetStreamUpdaterHandler(msg jetstream.Msg) {
 			}
 		}
 
-		if us.HasComponent("cert-manager") {
+		if us.HasComponent("cert-manager") && msg.Subject() == "cert-manager.update."+hostname {
 			if err := us.CertManagerUpdate(data); err != nil {
 				log.Printf("[ERROR]: could not update %s, reason: %v", "cert-manager", err)
 				if err := model.UpdateComponent(component.ComponentCertManager, data.Version, component.Channel(data.Channel), component.UpdateStatusError, err.Error()); err != nil {
@@ -207,7 +207,7 @@ func (us *UpdaterService) JetStreamUpdaterHandler(msg jetstream.Msg) {
 	}
 
 	if msg.Subject() == fmt.Sprintf("server.rollback.%s", hostname) {
-		if us.HasComponent("nats") {
+		if us.HasComponent("nats") && msg.Subject() == "nats.rollback."+hostname {
 			if err := us.ComponentRollback("openuem-nats-service"); err != nil {
 				log.Printf("[ERROR]: could not rollback %s, reason: %v", "openuem-nats-service", err)
 				if err := model.RollbackComponent(component.ComponentNats, data.Version, component.Channel(data.Channel), component.UpdateStatusError, err.Error()); err != nil {
@@ -219,7 +219,7 @@ func (us *UpdaterService) JetStreamUpdaterHandler(msg jetstream.Msg) {
 			}
 		}
 
-		if us.HasComponent("ocsp") {
+		if us.HasComponent("ocsp") && msg.Subject() == "ocsp.rollback."+hostname {
 			if err := us.ComponentRollback("openuem-ocsp-responder"); err != nil {
 				log.Printf("[ERROR]: could not rollback %s, reason: %v", "openuem-ocsp-responder", err)
 				if err := model.RollbackComponent(component.ComponentOcsp, data.Version, component.Channel(data.Channel), component.UpdateStatusError, err.Error()); err != nil {
@@ -231,7 +231,7 @@ func (us *UpdaterService) JetStreamUpdaterHandler(msg jetstream.Msg) {
 			}
 		}
 
-		if us.HasComponent("console") {
+		if us.HasComponent("console") && msg.Subject() == "console.rollback."+hostname {
 			if err := us.ComponentRollback("openuem-console-service"); err != nil {
 				log.Printf("[ERROR]: could not rollback %s, reason: %v", "openuem-console-service", err)
 				if err := model.RollbackComponent(component.ComponentConsole, data.Version, component.Channel(data.Channel), component.UpdateStatusError, err.Error()); err != nil {
@@ -243,7 +243,7 @@ func (us *UpdaterService) JetStreamUpdaterHandler(msg jetstream.Msg) {
 			}
 		}
 
-		if us.HasComponent("agent-worker") {
+		if us.HasComponent("agent-worker") && msg.Subject() == "agent-worker.rollback."+hostname {
 			if err := us.ComponentRollback("openuem-agent-worker"); err != nil {
 				log.Printf("[ERROR]: could not rollback %s, reason: %v", "openuem-agent-worker", err)
 				if err := model.RollbackComponent(component.ComponentAgentWorker, data.Version, component.Channel(data.Channel), component.UpdateStatusError, err.Error()); err != nil {
@@ -255,7 +255,7 @@ func (us *UpdaterService) JetStreamUpdaterHandler(msg jetstream.Msg) {
 			}
 		}
 
-		if us.HasComponent("notification-worker") {
+		if us.HasComponent("notification-worker") && msg.Subject() == "notification-worker.rollback."+hostname {
 			if err := us.ComponentRollback("openuem-notification-worker"); err != nil {
 				log.Printf("[ERROR]: could not rollback %s, reason: %v", "openuem-notification-worker", err)
 				if err := model.RollbackComponent(component.ComponentNotificationWorker, data.Version, component.Channel(data.Channel), component.UpdateStatusError, err.Error()); err != nil {
@@ -267,7 +267,7 @@ func (us *UpdaterService) JetStreamUpdaterHandler(msg jetstream.Msg) {
 			}
 		}
 
-		if us.HasComponent("cert-manager-worker") {
+		if us.HasComponent("cert-manager-worker") && msg.Subject() == "cert-manager-worker.rollback."+hostname {
 			if err := us.ComponentRollback("openuem-cert-manager-worker"); err != nil {
 				log.Printf("[ERROR]: could not rollback %s, reason: %v", "cert-manager-worker", err)
 				if err := model.RollbackComponent(component.ComponentCertManagerWorker, data.Version, component.Channel(data.Channel), component.UpdateStatusError, err.Error()); err != nil {
@@ -279,7 +279,7 @@ func (us *UpdaterService) JetStreamUpdaterHandler(msg jetstream.Msg) {
 			}
 		}
 
-		if us.HasComponent("cert-manager") {
+		if us.HasComponent("cert-manager") && msg.Subject() == "cert-manager.rollback."+hostname {
 			if err := us.CertManagerRollback(); err != nil {
 				log.Printf("[ERROR]: could not rollback %s, reason: %v", "cert-manager", err)
 				if err := model.RollbackComponent(component.ComponentCertManager, data.Version, component.Channel(data.Channel), component.UpdateStatusError, err.Error()); err != nil {
