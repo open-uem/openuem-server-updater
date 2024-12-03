@@ -4,3 +4,6 @@
 [submodule "internal/utils"]
 	path = internal/utils
 	url = git@github.com:doncicuto/openuem-utils.git
+[submodule "internal/ent"]
+	path = internal/ent
+	url = git@github.com:doncicuto/openuem-ent.git

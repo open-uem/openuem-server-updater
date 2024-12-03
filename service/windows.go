@@ -12,6 +12,8 @@ import (
 	"runtime"
 	"time"
 
+	"github.com/doncicuto/openuem-server-updater/models"
+	"github.com/doncicuto/openuem_ent/component"
 	"github.com/doncicuto/openuem_nats"
 	"github.com/doncicuto/openuem_utils"
 	"github.com/nats-io/nats.go/jetstream"
@@ -91,6 +93,8 @@ func (us *UpdaterService) queueSubscribeForWindows() error {
 func (us *UpdaterService) JetStreamUpdaterHandler(msg jetstream.Msg) {
 	hostname, err := os.Hostname()
 	if err != nil {
+		log.Printf("[ERROR]: could not get hostname, reason: %v\n", err)
+		msg.Ack()
 		return
 	}
 
@@ -98,69 +102,197 @@ func (us *UpdaterService) JetStreamUpdaterHandler(msg jetstream.Msg) {
 	data := openuem_nats.OpenUEMServerRelease{}
 	if err := json.Unmarshal(msg.Data(), &data); err != nil {
 		log.Printf("[ERROR]: could not unmarshal update request, reason: %v\n", err)
-		msg.NakWithDelay(60 * time.Minute)
+		msg.Ack()
 		return
 	}
 
+	dbUrl, err := openuem_utils.CreatePostgresDatabaseURL()
+	if err != nil {
+		log.Printf("[ERROR]: could not get database url, reason: %v\n", err)
+		msg.Ack()
+		return
+	}
+
+	model, err := models.New(dbUrl)
+	if err != nil {
+		msg.NakWithDelay(10 * time.Minute)
+		return
+	}
+	defer model.Close()
+
 	if msg.Subject() == fmt.Sprintf("server.update.%s", hostname) {
 		if us.HasComponent("nats") {
-			us.ComponentUpdate(data, "openuem-nats-service")
+			if err := us.ComponentUpdate(data, "openuem-nats-service"); err != nil {
+				log.Printf("[ERROR]: could not update %s, reason: %v", "openuem-nats-service", err)
+				if err := model.UpdateComponent(component.ComponentNats, data.Version, component.Channel(data.Channel), component.UpdateStatusError, err.Error()); err != nil {
+					log.Printf("[ERROR]: could not update component %s status, reason: %v", "openuem-nats-service", err)
+				}
+			}
+			if err := model.UpdateComponent(component.ComponentNats, data.Version, component.Channel(data.Channel), component.UpdateStatusSuccess, "updated"); err != nil {
+				log.Printf("[ERROR]: could not update component %s status, reason: %v", "openuem-nats-service", err)
+			}
 		}
 
 		if us.HasComponent("ocsp") {
-			us.ComponentUpdate(data, "openuem-ocsp-responder")
+			if err := us.ComponentUpdate(data, "openuem-ocsp-responder"); err != nil {
+				log.Printf("[ERROR]: could not update %s, reason: %v", "openuem-ocsp-responder", err)
+				if err := model.UpdateComponent(component.ComponentOcsp, data.Version, component.Channel(data.Channel), component.UpdateStatusError, err.Error()); err != nil {
+					log.Printf("[ERROR]: could not update component %s status, reason: %v", "openuem-ocsp-responder", err)
+				}
+			}
+			if err := model.UpdateComponent(component.ComponentOcsp, data.Version, component.Channel(data.Channel), component.UpdateStatusSuccess, "updated"); err != nil {
+				log.Printf("[ERROR]: could not update component %s status, reason: %v", "openuem-ocsp-responder", err)
+			}
 		}
 
 		if us.HasComponent("console") {
-			us.ComponentUpdate(data, "openuem-console-service")
+			if err := us.ComponentUpdate(data, "openuem-console-service"); err != nil {
+				log.Printf("[ERROR]: could not update %s, reason: %v", "openuem-console-service", err)
+				if err := model.UpdateComponent(component.ComponentConsole, data.Version, component.Channel(data.Channel), component.UpdateStatusError, err.Error()); err != nil {
+					log.Printf("[ERROR]: could not update component %s status, reason: %v", "openuem-console-service", err)
+				}
+			}
+			if err := model.UpdateComponent(component.ComponentConsole, data.Version, component.Channel(data.Channel), component.UpdateStatusSuccess, "updated"); err != nil {
+				log.Printf("[ERROR]: could not update component %s status, reason: %v", "openuem-console-service", err)
+			}
 		}
 
 		if us.HasComponent("agent-worker") {
-			us.ComponentUpdate(data, "openuem-agent-worker")
+			if err := us.ComponentUpdate(data, "openuem-agent-worker"); err != nil {
+				log.Printf("[ERROR]: could not update %s, reason: %v", "openuem-agent-worker", err)
+				if err := model.UpdateComponent(component.ComponentAgentWorker, data.Version, component.Channel(data.Channel), component.UpdateStatusError, err.Error()); err != nil {
+					log.Printf("[ERROR]: could not update component %s status, reason: %v", "openuem-agent-worker", err)
+				}
+			}
+			if err := model.UpdateComponent(component.ComponentAgentWorker, data.Version, component.Channel(data.Channel), component.UpdateStatusSuccess, "updated"); err != nil {
+				log.Printf("[ERROR]: could not update component %s status, reason: %v", "openuem-agent-worker", err)
+			}
 		}
 
 		if us.HasComponent("notification-worker") {
-			us.ComponentUpdate(data, "openuem-notification-worker")
+			if err := us.ComponentUpdate(data, "openuem-notification-worker"); err != nil {
+				log.Printf("[ERROR]: could not update %s, reason: %v", "notification-worker", err)
+				if err := model.UpdateComponent(component.ComponentNotificationWorker, data.Version, component.Channel(data.Channel), component.UpdateStatusError, err.Error()); err != nil {
+					log.Printf("[ERROR]: could not update component %s status, reason: %v", "openuem-notification-worker", err)
+				}
+			}
+			if err := model.UpdateComponent(component.ComponentNotificationWorker, data.Version, component.Channel(data.Channel), component.UpdateStatusSuccess, "updated"); err != nil {
+				log.Printf("[ERROR]: could not update component %s status, reason: %v", "openuem-notification-worker", err)
+			}
 		}
 
 		if us.HasComponent("cert-manager-worker") {
-			us.ComponentUpdate(data, "openuem-cert-manager-worker")
+			if err := us.ComponentUpdate(data, "openuem-cert-manager-worker"); err != nil {
+				log.Printf("[ERROR]: could not update %s, reason: %v", "cert-manager-worker", err)
+				if err := model.UpdateComponent(component.ComponentCertManagerWorker, data.Version, component.Channel(data.Channel), component.UpdateStatusError, err.Error()); err != nil {
+					log.Printf("[ERROR]: could not update component %s status, reason: %v", "openuem-cert-manager-worker", err)
+				}
+			}
+			if err := model.UpdateComponent(component.ComponentCertManagerWorker, data.Version, component.Channel(data.Channel), component.UpdateStatusSuccess, "updated"); err != nil {
+				log.Printf("[ERROR]: could not update component %s status, reason: %v", "openuem-cert-manager-worker", err)
+			}
 		}
 
 		if us.HasComponent("cert-manager") {
-			us.CertManagerUpdate(data)
+			if err := us.CertManagerUpdate(data); err != nil {
+				log.Printf("[ERROR]: could not update %s, reason: %v", "cert-manager", err)
+				if err := model.UpdateComponent(component.ComponentCertManager, data.Version, component.Channel(data.Channel), component.UpdateStatusError, err.Error()); err != nil {
+					log.Printf("[ERROR]: could not update component %s status, reason: %v", "openuem-cert-manager", err)
+				}
+			}
+			if err := model.UpdateComponent(component.ComponentCertManager, data.Version, component.Channel(data.Channel), component.UpdateStatusSuccess, "updated"); err != nil {
+				log.Printf("[ERROR]: could not update component %s status, reason: %v", "openuem-cert-manager", err)
+			}
 		}
 	}
 
 	if msg.Subject() == fmt.Sprintf("server.rollback.%s", hostname) {
 		if us.HasComponent("nats") {
-			us.ComponentRollback("openuem-nats-service")
+			if err := us.ComponentRollback("openuem-nats-service"); err != nil {
+				log.Printf("[ERROR]: could not rollback %s, reason: %v", "openuem-nats-service", err)
+				if err := model.RollbackComponent(component.ComponentNats, data.Version, component.Channel(data.Channel), component.UpdateStatusError, err.Error()); err != nil {
+					log.Printf("[ERROR]: could not update component %s status, reason: %v", "openuem-nats-service", err)
+				}
+			}
+			if err := model.RollbackComponent(component.ComponentNats, data.Version, component.Channel(data.Channel), component.UpdateStatusSuccess, "rolled back"); err != nil {
+				log.Printf("[ERROR]: could not update component %s status, reason: %v", "openuem-nats-service", err)
+			}
 		}
 
 		if us.HasComponent("ocsp") {
-			us.ComponentRollback("openuem-ocsp-responder")
+			if err := us.ComponentRollback("openuem-ocsp-responder"); err != nil {
+				log.Printf("[ERROR]: could not rollback %s, reason: %v", "openuem-ocsp-responder", err)
+				if err := model.RollbackComponent(component.ComponentOcsp, data.Version, component.Channel(data.Channel), component.UpdateStatusError, err.Error()); err != nil {
+					log.Printf("[ERROR]: could not update component %s status, reason: %v", "openuem-ocsp-responder", err)
+				}
+			}
+			if err := model.RollbackComponent(component.ComponentOcsp, data.Version, component.Channel(data.Channel), component.UpdateStatusSuccess, "rolled back"); err != nil {
+				log.Printf("[ERROR]: could not update component %s status, reason: %v", "openuem-ocsp-responder", err)
+			}
 		}
 
 		if us.HasComponent("console") {
-			us.ComponentRollback("openuem-console-service")
+			if err := us.ComponentRollback("openuem-console-service"); err != nil {
+				log.Printf("[ERROR]: could not rollback %s, reason: %v", "openuem-console-service", err)
+				if err := model.RollbackComponent(component.ComponentConsole, data.Version, component.Channel(data.Channel), component.UpdateStatusError, err.Error()); err != nil {
+					log.Printf("[ERROR]: could not update component %s status, reason: %v", "openuem-console-service", err)
+				}
+			}
+			if err := model.RollbackComponent(component.ComponentConsole, data.Version, component.Channel(data.Channel), component.UpdateStatusSuccess, "rolled back"); err != nil {
+				log.Printf("[ERROR]: could not update component %s status, reason: %v", "openuem-console-service", err)
+			}
 		}
 
 		if us.HasComponent("agent-worker") {
-			us.ComponentRollback("openuem-agent-worker")
+			if err := us.ComponentRollback("openuem-agent-worker"); err != nil {
+				log.Printf("[ERROR]: could not rollback %s, reason: %v", "openuem-agent-worker", err)
+				if err := model.RollbackComponent(component.ComponentAgentWorker, data.Version, component.Channel(data.Channel), component.UpdateStatusError, err.Error()); err != nil {
+					log.Printf("[ERROR]: could not update component %s status, reason: %v", "openuem-agent-worker", err)
+				}
+			}
+			if err := model.RollbackComponent(component.ComponentAgentWorker, data.Version, component.Channel(data.Channel), component.UpdateStatusSuccess, "rolled back"); err != nil {
+				log.Printf("[ERROR]: could not update component %s status, reason: %v", "openuem-agent-worker", err)
+			}
 		}
 
 		if us.HasComponent("notification-worker") {
-			us.ComponentRollback("openuem-notification-worker")
+			if err := us.ComponentRollback("openuem-notification-worker"); err != nil {
+				log.Printf("[ERROR]: could not rollback %s, reason: %v", "openuem-notification-worker", err)
+				if err := model.RollbackComponent(component.ComponentNotificationWorker, data.Version, component.Channel(data.Channel), component.UpdateStatusError, err.Error()); err != nil {
+					log.Printf("[ERROR]: could not update component %s status, reason: %v", "openuem-notification-worker", err)
+				}
+			}
+			if err := model.RollbackComponent(component.ComponentNotificationWorker, data.Version, component.Channel(data.Channel), component.UpdateStatusSuccess, "rolled back"); err != nil {
+				log.Printf("[ERROR]: could not update component %s status, reason: %v", "openuem-notification-worker", err)
+			}
 		}
 
 		if us.HasComponent("cert-manager-worker") {
-			us.ComponentRollback("openuem-cert-manager-worker")
+			if err := us.ComponentRollback("openuem-cert-manager-worker"); err != nil {
+				log.Printf("[ERROR]: could not rollback %s, reason: %v", "cert-manager-worker", err)
+				if err := model.RollbackComponent(component.ComponentCertManagerWorker, data.Version, component.Channel(data.Channel), component.UpdateStatusError, err.Error()); err != nil {
+					log.Printf("[ERROR]: could not update component %s status, reason: %v", "openuem-cert-manager-worker", err)
+				}
+			}
+			if err := model.RollbackComponent(component.ComponentCertManagerWorker, data.Version, component.Channel(data.Channel), component.UpdateStatusSuccess, "rolled back"); err != nil {
+				log.Printf("[ERROR]: could not update component %s status, reason: %v", "openuem-cert-manager-worker", err)
+			}
 		}
 
 		if us.HasComponent("cert-manager") {
-			us.CertManagerRollback()
+			if err := us.CertManagerRollback(); err != nil {
+				log.Printf("[ERROR]: could not rollback %s, reason: %v", "cert-manager", err)
+				if err := model.RollbackComponent(component.ComponentCertManager, data.Version, component.Channel(data.Channel), component.UpdateStatusError, err.Error()); err != nil {
+					log.Printf("[ERROR]: could not update component %s status, reason: %v", "openuem-cert-manager", err)
+				}
+			}
+			if err := model.RollbackComponent(component.ComponentCertManager, data.Version, component.Channel(data.Channel), component.UpdateStatusSuccess, "rolled back"); err != nil {
+				log.Printf("[ERROR]: could not update component %s status, reason: %v", "openuem-cert-manager", err)
+			}
 		}
 	}
+
+	msg.Ack()
 }
 
 func (us *UpdaterService) ReadWindowsConfig() error {
