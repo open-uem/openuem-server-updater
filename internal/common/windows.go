@@ -228,57 +228,45 @@ func (us *UpdaterService) ReadWindowsConfig() error {
 	us.Channel = key.String()
 
 	key, err = cfg.Section("Components").GetKey("OCSP")
-	if err != nil {
-		log.Println("[ERROR]: could not get OCSP component key")
-		return err
-	}
-	if key.String() == "yes" {
-		us.OCSPResponderInstalled = true
+	if err == nil {
+		if key.String() == "yes" {
+			us.OCSPResponderInstalled = true
+		}
 	}
 
 	key, err = cfg.Section("Components").GetKey("NATS")
-	if err != nil {
-		log.Println("[ERROR]: could not get NATS component key")
-		return err
-	}
-	if key.String() == "yes" {
-		us.NATSInstalled = true
+	if err == nil {
+		if key.String() == "yes" {
+			us.NATSInstalled = true
+		}
 	}
 
 	key, err = cfg.Section("Components").GetKey("AgentWorker")
-	if err != nil {
-		log.Println("[ERROR]: could not get Agent Worker component key")
-		return err
-	}
-	if key.String() == "yes" {
-		us.AgentWorkerInstalled = true
+	if err == nil {
+		if key.String() == "yes" {
+			us.AgentWorkerInstalled = true
+		}
 	}
 
 	key, err = cfg.Section("Components").GetKey("CertManagerWorker")
-	if err != nil {
-		log.Println("[ERROR]: could not get Cert Manager Worker component key")
-		return err
-	}
-	if key.String() == "yes" {
-		us.CertManagerWorkerInstalled = true
+	if err == nil {
+		if key.String() == "yes" {
+			us.CertManagerWorkerInstalled = true
+		}
 	}
 
 	key, err = cfg.Section("Components").GetKey("NotificationWorker")
-	if err != nil {
-		log.Println("[ERROR]: could not get Notification Worker component key")
-		return err
-	}
-	if key.String() == "yes" {
-		us.NotificationWorkerInstalled = true
+	if err == nil {
+		if key.String() == "yes" {
+			us.NotificationWorkerInstalled = true
+		}
 	}
 
 	key, err = cfg.Section("Components").GetKey("Console")
-	if err != nil {
-		log.Println("[ERROR]: could not get Console component key")
-		return err
-	}
-	if key.String() == "yes" {
-		us.ConsoleInstalled = true
+	if err == nil {
+		if key.String() == "yes" {
+			us.ConsoleInstalled = true
+		}
 	}
 
 	// Read the DBUrl
