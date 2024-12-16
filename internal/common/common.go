@@ -12,18 +12,26 @@ import (
 const NATS_TOKEN = "OpenUEM"
 
 type UpdaterService struct {
-	NATSConnection         *nats.Conn
-	NATSConnectJob         gocron.Job
-	DBConnectJob           gocron.Job
-	DBUrl                  string
-	NATSServers            string
-	CACert                 string
-	UpdaterCert            string
-	UpdaterKey             string
-	Model                  *models.Model
-	TaskScheduler          gocron.Scheduler
-	Logger                 *openuem_utils.OpenUEMLogger
-	JetstreamContextCancel context.CancelFunc
+	NATSConnection              *nats.Conn
+	NATSConnectJob              gocron.Job
+	DBConnectJob                gocron.Job
+	DBUrl                       string
+	NATSServers                 string
+	CACert                      string
+	UpdaterCert                 string
+	UpdaterKey                  string
+	Model                       *models.Model
+	TaskScheduler               gocron.Scheduler
+	Logger                      *openuem_utils.OpenUEMLogger
+	JetstreamContextCancel      context.CancelFunc
+	NATSInstalled               bool
+	ConsoleInstalled            bool
+	AgentWorkerInstalled        bool
+	NotificationWorkerInstalled bool
+	CertManagerWorkerInstalled  bool
+	OCSPResponderInstalled      bool
+	Version                     string
+	Channel                     string
 }
 
 func NewUpdateService() (*UpdaterService, error) {

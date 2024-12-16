@@ -16,6 +16,14 @@ func (us *UpdaterService) StartDBConnectJob(version string) error {
 	if err == nil {
 		log.Println("[INFO]: connection established with database")
 
+		if err := us.SetServer(); err != nil {
+			log.Fatalf("[FATAL]: %v", err)
+		}
+
+		if err := us.SetInstalledComponents(); err != nil {
+			log.Fatalf("[FATAL]: %v", err)
+		}
+
 		// Evaluate result of previous update
 		s, err := us.Model.GetServerStatus()
 		if err != nil {
@@ -46,6 +54,14 @@ func (us *UpdaterService) StartDBConnectJob(version string) error {
 				log.Println("[INFO]: connection established with database")
 				if err := us.TaskScheduler.RemoveJob(us.DBConnectJob.ID()); err != nil {
 					return
+				}
+
+				if err := us.SetServer(); err != nil {
+					log.Fatalf("[FATAL]: %v", err)
+				}
+
+				if err := us.SetInstalledComponents(); err != nil {
+					log.Fatalf("[FATAL]: %v", err)
 				}
 
 				// Evaluate result of previous update

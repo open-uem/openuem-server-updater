@@ -26,7 +26,7 @@ func (us *UpdaterService) StartWindowsService() {
 	log.Println("[INFO]: task scheduler has been started")
 
 	// Start DB connection job
-	if err := us.StartDBConnectJob(VERSION); err != nil {
+	if err := us.StartDBConnectJob(us.Version); err != nil {
 		return
 	}
 
@@ -212,6 +212,74 @@ func (us *UpdaterService) ReadWindowsConfig() error {
 		return err
 	}
 	us.NATSServers = key.String()
+
+	key, err = cfg.Section("Server").GetKey("Version")
+	if err != nil {
+		log.Println("[ERROR]: could not get Version")
+		return err
+	}
+	us.Version = key.String()
+
+	key, err = cfg.Section("Server").GetKey("Channel")
+	if err != nil {
+		log.Println("[ERROR]: could not get Chanel")
+		return err
+	}
+	us.Channel = key.String()
+
+	key, err = cfg.Section("Components").GetKey("OCSP")
+	if err != nil {
+		log.Println("[ERROR]: could not get OCSP component key")
+		return err
+	}
+	if key.String() == "yes" {
+		us.OCSPResponderInstalled = true
+	}
+
+	key, err = cfg.Section("Components").GetKey("NATS")
+	if err != nil {
+		log.Println("[ERROR]: could not get NATS component key")
+		return err
+	}
+	if key.String() == "yes" {
+		us.NATSInstalled = true
+	}
+
+	key, err = cfg.Section("Components").GetKey("AgentWorker")
+	if err != nil {
+		log.Println("[ERROR]: could not get Agent Worker component key")
+		return err
+	}
+	if key.String() == "yes" {
+		us.AgentWorkerInstalled = true
+	}
+
+	key, err = cfg.Section("Components").GetKey("CertManagerWorker")
+	if err != nil {
+		log.Println("[ERROR]: could not get Cert Manager Worker component key")
+		return err
+	}
+	if key.String() == "yes" {
+		us.CertManagerWorkerInstalled = true
+	}
+
+	key, err = cfg.Section("Components").GetKey("NotificationWorker")
+	if err != nil {
+		log.Println("[ERROR]: could not get Notification Worker component key")
+		return err
+	}
+	if key.String() == "yes" {
+		us.NotificationWorkerInstalled = true
+	}
+
+	key, err = cfg.Section("Components").GetKey("Console")
+	if err != nil {
+		log.Println("[ERROR]: could not get Console component key")
+		return err
+	}
+	if key.String() == "yes" {
+		us.ConsoleInstalled = true
+	}
 
 	// Read the DBUrl
 	us.DBUrl, err = openuem_utils.CreatePostgresDatabaseURL()
