@@ -206,7 +206,7 @@ func (us *UpdaterService) ReadWindowsConfig() error {
 		return err
 	}
 
-	key, err := cfg.Section("NATS").GetKey("NATSServer")
+	key, err := cfg.Section("NATS").GetKey("NATSServers")
 	if err != nil {
 		log.Println("[ERROR]: could not get NATSServers")
 		return err
