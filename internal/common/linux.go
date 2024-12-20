@@ -1,12 +1,10 @@
-//go:build windows
+//go:build linux
 
 package common
 
 import (
-	"fmt"
 	"log"
 	"os/exec"
-	"path/filepath"
 	"time"
 
 	"github.com/doncicuto/openuem_ent/server"
@@ -20,7 +18,7 @@ import (
 func NewUpdateService() (*UpdaterService, error) {
 	var err error
 	us := UpdaterService{}
-	us.Logger = openuem_utils.NewLogger("openuem-server-updater.txt")
+	us.Logger = openuem_utils.NewLogger("openuem-server-updater")
 
 	us.TaskScheduler, err = gocron.NewScheduler()
 	if err != nil {
@@ -113,24 +111,37 @@ func (us *UpdaterService) ReadConfig() error {
 	}
 
 	// Read required certificates and private key
-	cwd, err := openuem_utils.GetWd()
+	key, err = cfg.Section("Certificates").GetKey("UpdaterCert")
 	if err != nil {
-		log.Fatalf("[FATAL]: could not get current working directory")
+		log.Printf("[ERROR]: could not get updater cert path, reason: %v\n", err)
+		return err
 	}
+	us.UpdaterCert = key.String()
 
-	us.UpdaterCert = filepath.Join(cwd, "certificates", "updater", "updater.cer")
 	_, err = openuem_utils.ReadPEMCertificate(us.UpdaterCert)
 	if err != nil {
 		log.Fatalf("[FATAL]: could not read updater certificate")
 	}
 
-	us.UpdaterKey = filepath.Join(cwd, "certificates", "updater", "updater.key")
+	key, err = cfg.Section("Certificates").GetKey("UpdaterKey")
+	if err != nil {
+		log.Printf("[ERROR]: could not get updater cert key, reason: %v\n", err)
+		return err
+	}
+	us.UpdaterKey = key.String()
+
 	_, err = openuem_utils.ReadPEMPrivateKey(us.UpdaterKey)
 	if err != nil {
 		log.Fatalf("[FATAL]: could not read updater private key")
 	}
 
-	us.CACert = filepath.Join(cwd, "certificates", "ca", "ca.cer")
+	key, err = cfg.Section("Certificates").GetKey("CACert")
+	if err != nil {
+		log.Printf("[ERROR]: could not get CA cert path, reason: %v\n", err)
+		return err
+	}
+
+	us.CACert = key.String()
 	_, err = openuem_utils.ReadPEMCertificate(us.CACert)
 	if err != nil {
 		log.Fatalf("[FATAL]: could not read CA certificate")
@@ -140,35 +151,16 @@ func (us *UpdaterService) ReadConfig() error {
 }
 
 func (us *UpdaterService) ExecuteUpdate(data openuem_nats.OpenUEMUpdateRequest, msg jetstream.Msg, version string, channel server.Channel) {
-	// Download the file
-	cwd, err := openuem_utils.GetWd()
-	if err != nil {
-		log.Printf("[ERROR]: could not get working directory, reason %v", err)
-		msg.Ack()
-		if err := us.Model.UpdateServerStatus(data.Version, channel, server.UpdateStatusError, fmt.Sprintf("could not get working directory, reason: %v", err), time.Now()); err != nil {
-			log.Printf("[ERROR]: could not save server status, reason: %v", err)
-		}
-		return
-	}
-
-	downloadPath := filepath.Join(cwd, "updates", "server-setup.exe")
-	if err := openuem_utils.DownloadFile(data.DownloadFrom, downloadPath, data.DownloadHash); err != nil {
-		log.Printf("[ERROR]: could not download update to directory, reason %v", err)
-		msg.NakWithDelay(60 * time.Minute)
-		if err := us.Model.UpdateServerStatus(data.Version, channel, server.UpdateStatusError, fmt.Sprintf("could not download update to directory, reason: %v", err), time.Now()); err != nil {
-			log.Printf("[ERROR]: could not save server status, reason: %v", err)
-		}
-		return
-	}
-
 	msg.Ack()
 	if err := us.Model.UpdateServerStatus(data.Version, channel, server.UpdateStatusInProgress, "", time.Now()); err != nil {
 		log.Printf("[ERROR]: could not save server status, reason: %v", err)
 	}
-	cmd := exec.Command(downloadPath, "/VERYSILENT")
-	err = cmd.Start()
+
+	cmd := exec.Command("/bin/sh", "-c", "sudo apt install openuem-server="+data.Version)
+	err := cmd.Start()
 	if err != nil {
-		log.Printf("[ERROR]: could not run %s command, reason: %v", downloadPath, err)
+		log.Printf("[ERROR]: could not run %s command, reason: %v", cmd.String(), err)
 		return
 	}
+	log.Println("[INFO]: update command has been started: ", cmd.String())
 }

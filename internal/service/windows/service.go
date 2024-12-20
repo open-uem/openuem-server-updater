@@ -16,13 +16,13 @@ func main() {
 		log.Fatalf("[FATAL]: could not create task scheduler, reason: %s", err.Error())
 	}
 
-	if err := us.ReadWindowsConfig(); err != nil {
+	if err := us.ReadConfig(); err != nil {
 		log.Fatalf("[FATAL]: %v", err)
 	}
 
 	ws := openuem_utils.NewOpenUEMWindowsService()
-	ws.ServiceStart = us.StartWindowsService
-	ws.ServiceStop = us.StopWindowsService
+	ws.ServiceStart = us.StartService
+	ws.ServiceStop = us.StopService
 
 	// Run service
 	err = svc.Run("openuem-updater-service", ws)

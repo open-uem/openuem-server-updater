@@ -17,7 +17,7 @@ func (m *Model) SetServer(version string, channel server.Channel) error {
 	}
 
 	exists := true
-	s, err := m.Client.Server.Query().Where(server.Hostname(hostname), server.Arch(runtime.GOARCH), server.Os(runtime.GOOS), server.Version(version), server.ChannelEQ(channel)).Only(context.Background())
+	s, err := m.Client.Server.Query().Where(server.Hostname(hostname), server.Arch(runtime.GOARCH), server.Os(runtime.GOOS), server.ChannelEQ(channel)).Only(context.Background())
 	if err != nil {
 		if !openuem_ent.IsNotFound(err) {
 			return err
@@ -37,7 +37,7 @@ func (m *Model) UpdateServerStatus(version string, channel server.Channel, statu
 		return err
 	}
 
-	s, err := m.Client.Server.Query().Where(server.Hostname(hostname), server.Arch(runtime.GOARCH), server.Os(runtime.GOOS), server.Version(version), server.ChannelEQ(channel)).Only(context.Background())
+	s, err := m.Client.Server.Query().Where(server.Hostname(hostname), server.Arch(runtime.GOARCH), server.Os(runtime.GOOS), server.ChannelEQ(channel)).Only(context.Background())
 	if err != nil {
 		return err
 	}

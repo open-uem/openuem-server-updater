@@ -33,16 +33,3 @@ type UpdaterService struct {
 	Version                     string
 	Channel                     string
 }
-
-func NewUpdateService() (*UpdaterService, error) {
-	var err error
-	us := UpdaterService{}
-	us.Logger = openuem_utils.NewLogger("openuem-server-updater.txt")
-
-	us.TaskScheduler, err = gocron.NewScheduler()
-	if err != nil {
-		return nil, err
-	}
-
-	return &us, nil
-}
