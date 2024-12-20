@@ -15,9 +15,9 @@ func (us *UpdaterService) StartNATSConnectJob(queueSubscribe func() error) error
 	us.NATSConnection, err = openuem_nats.ConnectWithNATS(us.NATSServers, us.UpdaterCert, us.UpdaterKey, us.CACert)
 	if err == nil {
 		if err := queueSubscribe(); err == nil {
-			return err
+			return nil
 		}
-		return nil
+
 	}
 	log.Printf("[ERROR]: could not connect to NATS %v", err)
 
