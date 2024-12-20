@@ -2,6 +2,7 @@ package common
 
 import (
 	"log"
+	"os/exec"
 	"time"
 
 	"github.com/doncicuto/openuem-server-updater/internal/models"
@@ -31,6 +32,15 @@ func (us *UpdaterService) StartDBConnectJob(version string) error {
 		}
 
 		if s.UpdateStatus == server.UpdateStatusInProgress && s.Version == version {
+			cmd := exec.Command("/bin/sh", "-c", "sudo dpkg-reconfigure -a")
+			err := cmd.Start()
+			if err != nil {
+				log.Printf("[ERROR]: could not run %s command, reason: %v", cmd.String(), err)
+			}
+			log.Println("[INFO]: dpkg reconfigure command has been started: ", cmd.String())
+			err = cmd.Wait()
+			log.Printf("[INFO]: Command finished with error: %v", err)
+
 			if err := us.Model.UpdateServerStatus(s.Version, s.Channel, server.UpdateStatusSuccess, s.UpdateMessage, s.UpdateWhen); err != nil {
 				log.Printf("[ERROR]: could not save server status, reason: %v\n", err)
 			}
