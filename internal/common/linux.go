@@ -3,6 +3,7 @@
 package common
 
 import (
+	"fmt"
 	"log"
 	"os/exec"
 	"time"
@@ -156,7 +157,7 @@ func (us *UpdaterService) ExecuteUpdate(data openuem_nats.OpenUEMUpdateRequest, 
 		log.Printf("[ERROR]: could not save server status, reason: %v", err)
 	}
 
-	cmd := exec.Command("/bin/sh", "-c", "sudo apt install openuem-server="+data.Version)
+	cmd := exec.Command("/bin/sh", "-c", fmt.Sprintf("echo %s | at now +1 minute", "sudo apt install openuem-server="+data.Version))
 	err := cmd.Start()
 	if err != nil {
 		log.Printf("[ERROR]: could not run %s command, reason: %v", cmd.String(), err)
