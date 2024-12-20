@@ -17,9 +17,8 @@ func (us *UpdaterService) StartNATSConnectJob(queueSubscribe func() error) error
 		if err := queueSubscribe(); err == nil {
 			return nil
 		}
-
 	}
-	log.Printf("[ERROR]: could not connect to NATS %v", err)
+	log.Println("[ERROR]: could not subscribe to updater messages")
 
 	us.NATSConnectJob, err = us.TaskScheduler.NewJob(
 		gocron.DurationJob(

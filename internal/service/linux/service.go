@@ -26,7 +26,7 @@ func main() {
 	// Keep the connection alive
 	done := make(chan os.Signal, 1)
 	signal.Notify(done, syscall.SIGINT, syscall.SIGTERM, os.Interrupt)
-	log.Println("[INFO]: the server updater is ready and waiting for requests")
+	log.Println("[INFO]: the server updater service has started")
 	<-done
 
 	us.StopService()
