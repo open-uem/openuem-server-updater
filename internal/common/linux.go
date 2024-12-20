@@ -163,4 +163,6 @@ func (us *UpdaterService) ExecuteUpdate(data openuem_nats.OpenUEMUpdateRequest, 
 		return
 	}
 	log.Println("[INFO]: update command has been started: ", cmd.String())
+	err = cmd.Wait()
+	log.Printf("[INFO]: Command finished with error: %v", err)
 }
