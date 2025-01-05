@@ -9,18 +9,18 @@ import (
 	"path/filepath"
 	"time"
 
-	"github.com/doncicuto/openuem_ent/server"
-	"github.com/doncicuto/openuem_nats"
-	"github.com/doncicuto/openuem_utils"
 	"github.com/go-co-op/gocron/v2"
 	"github.com/nats-io/nats.go/jetstream"
+	"github.com/open-uem/ent/server"
+	openuem_nats "github.com/open-uem/nats"
+	"github.com/open-uem/utils"
 	"gopkg.in/ini.v1"
 )
 
 func NewUpdateService() (*UpdaterService, error) {
 	var err error
 	us := UpdaterService{}
-	us.Logger = openuem_utils.NewLogger("openuem-server-updater.txt")
+	us.Logger = utils.NewLogger("openuem-server-updater.txt")
 
 	us.TaskScheduler, err = gocron.NewScheduler()
 	if err != nil {
@@ -34,7 +34,7 @@ func (us *UpdaterService) ReadConfig() error {
 	var err error
 
 	// Get conf file
-	configFile := openuem_utils.GetConfigFile()
+	configFile := utils.GetConfigFile()
 
 	// Open ini file
 	cfg, err := ini.Load(configFile)
@@ -106,32 +106,32 @@ func (us *UpdaterService) ReadConfig() error {
 	}
 
 	// Read the DBUrl
-	us.DBUrl, err = openuem_utils.CreatePostgresDatabaseURL()
+	us.DBUrl, err = utils.CreatePostgresDatabaseURL()
 	if err != nil {
 		log.Printf("[ERROR]: could not get database url, reason: %v\n", err)
 		return err
 	}
 
 	// Read required certificates and private key
-	cwd, err := openuem_utils.GetWd()
+	cwd, err := utils.GetWd()
 	if err != nil {
 		log.Fatalf("[FATAL]: could not get current working directory")
 	}
 
 	us.UpdaterCert = filepath.Join(cwd, "certificates", "updater", "updater.cer")
-	_, err = openuem_utils.ReadPEMCertificate(us.UpdaterCert)
+	_, err = utils.ReadPEMCertificate(us.UpdaterCert)
 	if err != nil {
 		log.Fatalf("[FATAL]: could not read updater certificate")
 	}
 
 	us.UpdaterKey = filepath.Join(cwd, "certificates", "updater", "updater.key")
-	_, err = openuem_utils.ReadPEMPrivateKey(us.UpdaterKey)
+	_, err = utils.ReadPEMPrivateKey(us.UpdaterKey)
 	if err != nil {
 		log.Fatalf("[FATAL]: could not read updater private key")
 	}
 
 	us.CACert = filepath.Join(cwd, "certificates", "ca", "ca.cer")
-	_, err = openuem_utils.ReadPEMCertificate(us.CACert)
+	_, err = utils.ReadPEMCertificate(us.CACert)
 	if err != nil {
 		log.Fatalf("[FATAL]: could not read CA certificate")
 	}
@@ -141,7 +141,7 @@ func (us *UpdaterService) ReadConfig() error {
 
 func (us *UpdaterService) ExecuteUpdate(data openuem_nats.OpenUEMUpdateRequest, msg jetstream.Msg, version string, channel server.Channel) {
 	// Download the file
-	cwd, err := openuem_utils.GetWd()
+	cwd, err := utils.GetWd()
 	if err != nil {
 		log.Printf("[ERROR]: could not get working directory, reason %v", err)
 		msg.Ack()
@@ -152,7 +152,7 @@ func (us *UpdaterService) ExecuteUpdate(data openuem_nats.OpenUEMUpdateRequest, 
 	}
 
 	downloadPath := filepath.Join(cwd, "updates", "server-setup.exe")
-	if err := openuem_utils.DownloadFile(data.DownloadFrom, downloadPath, data.DownloadHash); err != nil {
+	if err := utils.DownloadFile(data.DownloadFrom, downloadPath, data.DownloadHash); err != nil {
 		log.Printf("[ERROR]: could not download update to directory, reason %v", err)
 		msg.NakWithDelay(60 * time.Minute)
 		if err := us.Model.UpdateServerStatus(data.Version, channel, server.UpdateStatusError, fmt.Sprintf("could not download update to directory, reason: %v", err), time.Now()); err != nil {

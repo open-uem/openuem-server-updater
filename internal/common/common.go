@@ -3,10 +3,10 @@ package common
 import (
 	"context"
 
-	"github.com/doncicuto/openuem-server-updater/internal/models"
-	"github.com/doncicuto/openuem_utils"
 	"github.com/go-co-op/gocron/v2"
 	"github.com/nats-io/nats.go"
+	"github.com/open-uem/openuem-server-updater/internal/models"
+	"github.com/open-uem/utils"
 )
 
 const NATS_TOKEN = "OpenUEM"
@@ -22,7 +22,7 @@ type UpdaterService struct {
 	UpdaterKey                  string
 	Model                       *models.Model
 	TaskScheduler               gocron.Scheduler
-	Logger                      *openuem_utils.OpenUEMLogger
+	Logger                      *utils.OpenUEMLogger
 	JetstreamContextCancel      context.CancelFunc
 	NATSInstalled               bool
 	ConsoleInstalled            bool

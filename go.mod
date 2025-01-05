@@ -1,21 +1,15 @@
-module github.com/doncicuto/openuem-server-updater
+module github.com/open-uem/openuem-server-updater
 
-replace github.com/doncicuto/openuem_utils => ./internal/utils
-
-replace github.com/doncicuto/openuem_nats => ./internal/nats
-
-replace github.com/doncicuto/openuem_ent => ./internal/ent
-
-go 1.23.1
+go 1.23.4
 
 require (
 	entgo.io/ent v0.14.1
-	github.com/doncicuto/openuem_ent v0.0.0-00010101000000-000000000000
-	github.com/doncicuto/openuem_nats v0.0.0-00010101000000-000000000000
-	github.com/doncicuto/openuem_utils v0.0.0-00010101000000-000000000000
 	github.com/go-co-op/gocron/v2 v2.12.4
 	github.com/jackc/pgx/v5 v5.7.1
 	github.com/nats-io/nats.go v1.37.0
+	github.com/open-uem/ent v0.0.0-20250105121453-5b3092896406
+	github.com/open-uem/nats v0.0.0-20250105115437-3eca4264073e
+	github.com/open-uem/utils v0.0.0-20250105115248-b0599a18d2b5
 	golang.org/x/sys v0.27.0
 	gopkg.in/ini.v1 v1.67.0
 )

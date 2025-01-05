@@ -4,7 +4,7 @@ import (
 	"context"
 	"os"
 
-	"github.com/doncicuto/openuem_ent/server"
+	"github.com/open-uem/ent/server"
 )
 
 func (us *UpdaterService) SetInstalledComponents() error {

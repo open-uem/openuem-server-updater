@@ -4,9 +4,9 @@ import (
 	"log"
 	"time"
 
-	"github.com/doncicuto/openuem-server-updater/internal/models"
-	"github.com/doncicuto/openuem_ent/server"
 	"github.com/go-co-op/gocron/v2"
+	"github.com/open-uem/ent/server"
+	"github.com/open-uem/openuem-server-updater/internal/models"
 )
 
 func (us *UpdaterService) StartDBConnectJob(version string) error {

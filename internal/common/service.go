@@ -10,10 +10,10 @@ import (
 	"strings"
 	"time"
 
-	"github.com/doncicuto/openuem_ent/server"
-	"github.com/doncicuto/openuem_nats"
 	"github.com/go-co-op/gocron/v2"
 	"github.com/nats-io/nats.go/jetstream"
+	"github.com/open-uem/ent/server"
+	openuem_nats "github.com/open-uem/nats"
 )
 
 func (us *UpdaterService) StartService() {

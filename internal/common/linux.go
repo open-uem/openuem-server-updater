@@ -8,18 +8,18 @@ import (
 	"os/exec"
 	"time"
 
-	"github.com/doncicuto/openuem_ent/server"
-	"github.com/doncicuto/openuem_nats"
-	"github.com/doncicuto/openuem_utils"
 	"github.com/go-co-op/gocron/v2"
 	"github.com/nats-io/nats.go/jetstream"
+	"github.com/open-uem/ent/server"
+	openuem_nats "github.com/open-uem/nats"
+	"github.com/open-uem/utils"
 	"gopkg.in/ini.v1"
 )
 
 func NewUpdateService() (*UpdaterService, error) {
 	var err error
 	us := UpdaterService{}
-	us.Logger = openuem_utils.NewLogger("openuem-server-updater")
+	us.Logger = utils.NewLogger("openuem-server-updater")
 
 	us.TaskScheduler, err = gocron.NewScheduler()
 	if err != nil {
@@ -33,7 +33,7 @@ func (us *UpdaterService) ReadConfig() error {
 	var err error
 
 	// Get conf file
-	configFile := openuem_utils.GetConfigFile()
+	configFile := utils.GetConfigFile()
 
 	// Open ini file
 	cfg, err := ini.Load(configFile)
@@ -105,7 +105,7 @@ func (us *UpdaterService) ReadConfig() error {
 	}
 
 	// Read the DBUrl
-	us.DBUrl, err = openuem_utils.CreatePostgresDatabaseURL()
+	us.DBUrl, err = utils.CreatePostgresDatabaseURL()
 	if err != nil {
 		log.Printf("[ERROR]: could not get database url, reason: %v\n", err)
 		return err
@@ -119,7 +119,7 @@ func (us *UpdaterService) ReadConfig() error {
 	}
 	us.UpdaterCert = key.String()
 
-	_, err = openuem_utils.ReadPEMCertificate(us.UpdaterCert)
+	_, err = utils.ReadPEMCertificate(us.UpdaterCert)
 	if err != nil {
 		log.Fatalf("[FATAL]: could not read updater certificate")
 	}
@@ -131,7 +131,7 @@ func (us *UpdaterService) ReadConfig() error {
 	}
 	us.UpdaterKey = key.String()
 
-	_, err = openuem_utils.ReadPEMPrivateKey(us.UpdaterKey)
+	_, err = utils.ReadPEMPrivateKey(us.UpdaterKey)
 	if err != nil {
 		log.Fatalf("[FATAL]: could not read updater private key")
 	}
@@ -143,7 +143,7 @@ func (us *UpdaterService) ReadConfig() error {
 	}
 
 	us.CACert = key.String()
-	_, err = openuem_utils.ReadPEMCertificate(us.CACert)
+	_, err = utils.ReadPEMCertificate(us.CACert)
 	if err != nil {
 		log.Fatalf("[FATAL]: could not read CA certificate")
 	}

@@ -5,8 +5,8 @@ package main
 import (
 	"log"
 
-	"github.com/doncicuto/openuem-server-updater/internal/common"
-	"github.com/doncicuto/openuem_utils"
+	"github.com/open-uem/openuem-server-updater/internal/common"
+	"github.com/open-uem/utils"
 	"golang.org/x/sys/windows/svc"
 )
 
@@ -20,7 +20,7 @@ func main() {
 		log.Fatalf("[FATAL]: %v", err)
 	}
 
-	ws := openuem_utils.NewOpenUEMWindowsService()
+	ws := utils.NewOpenUEMWindowsService()
 	ws.ServiceStart = us.StartService
 	ws.ServiceStop = us.StopService
 

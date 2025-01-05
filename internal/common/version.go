@@ -1,7 +1,7 @@
 package common
 
 import (
-	"github.com/doncicuto/openuem_ent/server"
+	"github.com/open-uem/ent/server"
 )
 
 func (us *UpdaterService) SetServer() error {

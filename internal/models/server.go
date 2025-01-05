@@ -6,8 +6,8 @@ import (
 	"runtime"
 	"time"
 
-	"github.com/doncicuto/openuem_ent"
-	"github.com/doncicuto/openuem_ent/server"
+	openuem_ent "github.com/open-uem/ent"
+	"github.com/open-uem/ent/server"
 )
 
 func (m *Model) SetServer(version string, channel server.Channel) error {
