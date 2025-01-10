@@ -14,6 +14,7 @@ import (
 	"github.com/open-uem/ent/server"
 	openuem_nats "github.com/open-uem/nats"
 	"github.com/open-uem/utils"
+	"golang.org/x/sys/windows/svc"
 	"gopkg.in/ini.v1"
 )
 
@@ -165,7 +166,33 @@ func (us *UpdaterService) ExecuteUpdate(data openuem_nats.OpenUEMUpdateRequest, 
 	if err := us.Model.UpdateServerStatus(data.Version, channel, server.UpdateStatusInProgress, "", time.Now()); err != nil {
 		log.Printf("[ERROR]: could not save server status, reason: %v", err)
 	}
-	cmd := exec.Command(downloadPath, "/VERYSILENT", "/LOG")
+
+	// Stop services
+	if err := utils.WindowsSvcControl("openuem-agent-worker", svc.Stop, svc.Stopped); err != nil {
+		log.Printf("[ERROR]: could not stop openuem-agent-worker, reason: %v\n", err)
+	}
+
+	if err := utils.WindowsSvcControl("openuem-cert-manager-worker", svc.Stop, svc.Stopped); err != nil {
+		log.Printf("[ERROR]: could not stop openuem-cert-manager-worker, reason: %v\n", err)
+	}
+
+	if err := utils.WindowsSvcControl("openuem-notification-worker", svc.Stop, svc.Stopped); err != nil {
+		log.Printf("[ERROR]: could not stop openuem-notification-worker, reason: %v\n", err)
+	}
+
+	if err := utils.WindowsSvcControl("openuem-console-service", svc.Stop, svc.Stopped); err != nil {
+		log.Printf("[ERROR]: could not stop openuem-console-service, reason: %v\n", err)
+	}
+
+	if err := utils.WindowsSvcControl("openuem-ocsp-responder", svc.Stop, svc.Stopped); err != nil {
+		log.Printf("[ERROR]: could not stop openuem-ocsp-responder, reason: %v\n", err)
+	}
+
+	if err := utils.WindowsSvcControl("openuem-nats-service", svc.Stop, svc.Stopped); err != nil {
+		log.Printf("[ERROR]: could not stop openuem-nats-service, reason: %v\n", err)
+	}
+
+	cmd := exec.Command(downloadPath, "/VERYSILENT")
 	err = cmd.Start()
 	if err != nil {
 		log.Printf("[ERROR]: could not run %s command, reason: %v", downloadPath, err)
