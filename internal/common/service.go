@@ -22,7 +22,7 @@ func (us *UpdaterService) StartService() {
 	log.Println("[INFO]: task scheduler has been started")
 
 	// Start DB connection job
-	if err := us.StartDBConnectJob(us.Version); err != nil {
+	if err := us.StartDBConnectJob(); err != nil {
 		return
 	}
 
