@@ -165,7 +165,7 @@ func (us *UpdaterService) ExecuteUpdate(data openuem_nats.OpenUEMUpdateRequest, 
 	if err := us.Model.UpdateServerStatus(data.Version, channel, server.UpdateStatusInProgress, "", time.Now()); err != nil {
 		log.Printf("[ERROR]: could not save server status, reason: %v", err)
 	}
-	cmd := exec.Command(downloadPath, "/VERYSILENT")
+	cmd := exec.Command(downloadPath, "/VERYSILENT", "/LOG")
 	err = cmd.Start()
 	if err != nil {
 		log.Printf("[ERROR]: could not run %s command, reason: %v", downloadPath, err)
