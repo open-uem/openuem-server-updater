@@ -22,7 +22,7 @@ func (us *UpdaterService) StartDBConnectJob() error {
 			log.Println("[ERROR]: could not get server status")
 		}
 
-		if s.UpdateStatus == server.UpdateStatusInProgress {
+		if s != nil && s.UpdateStatus == server.UpdateStatusInProgress {
 			if s.Version == us.Version {
 				if err := us.Model.UpdateServerStatus(s.Version, s.Channel, server.UpdateStatusSuccess, "", s.UpdateWhen); err != nil {
 					log.Printf("[ERROR]: could not save server status, reason: %v\n", err)
