@@ -14,7 +14,6 @@ import (
 	"github.com/open-uem/ent/server"
 	openuem_nats "github.com/open-uem/nats"
 	"github.com/open-uem/utils"
-	"golang.org/x/sys/windows/svc"
 	"gopkg.in/ini.v1"
 )
 
@@ -167,35 +166,24 @@ func (us *UpdaterService) ExecuteUpdate(data openuem_nats.OpenUEMUpdateRequest, 
 		log.Printf("[ERROR]: could not save server status, reason: %v", err)
 	}
 
-	// Stop services
-	if err := utils.WindowsSvcControl("openuem-agent-worker", svc.Stop, svc.Stopped); err != nil {
-		log.Printf("[ERROR]: could not stop openuem-agent-worker, reason: %v\n", err)
+	cmd := exec.Command("schtasks.exe", "/DELETE", "/TN", "Update OpenUEM Server", "/F")
+	if err := cmd.Run(); err != nil {
+		log.Printf("[ERROR]: could not run %s command, reason: %v", "schtasks.exe /DELETE /TN Update OpenUEM Server /F", err)
 	}
 
-	if err := utils.WindowsSvcControl("openuem-cert-manager-worker", svc.Stop, svc.Stopped); err != nil {
-		log.Printf("[ERROR]: could not stop openuem-cert-manager-worker, reason: %v\n", err)
-	}
-
-	if err := utils.WindowsSvcControl("openuem-notification-worker", svc.Stop, svc.Stopped); err != nil {
-		log.Printf("[ERROR]: could not stop openuem-notification-worker, reason: %v\n", err)
-	}
-
-	if err := utils.WindowsSvcControl("openuem-console-service", svc.Stop, svc.Stopped); err != nil {
-		log.Printf("[ERROR]: could not stop openuem-console-service, reason: %v\n", err)
-	}
-
-	if err := utils.WindowsSvcControl("openuem-ocsp-responder", svc.Stop, svc.Stopped); err != nil {
-		log.Printf("[ERROR]: could not stop openuem-ocsp-responder, reason: %v\n", err)
-	}
-
-	if err := utils.WindowsSvcControl("openuem-nats-service", svc.Stop, svc.Stopped); err != nil {
-		log.Printf("[ERROR]: could not stop openuem-nats-service, reason: %v\n", err)
-	}
-
-	cmd := exec.Command(downloadPath, "/VERYSILENT")
-	err = cmd.Start()
-	if err != nil {
-		log.Printf("[ERROR]: could not run %s command, reason: %v", downloadPath, err)
-		return
+	cmd = exec.Command("schtasks.exe", "/Create",
+		"/SC",
+		"ONCE",
+		"/TN",
+		"Update OpenUEM Server",
+		"/TR",
+		fmt.Sprintf("cmd /C (sc.exe stop openuem-server-updater && '%s' /VERYSILENT)", downloadPath),
+		"/ST",
+		time.Now().Add(time.Minute).Format("15:04"),
+		"/ru",
+		"system",
+	)
+	if err := cmd.Run(); err != nil {
+		log.Printf("[ERROR]: could not run %s command, reason: %v", fmt.Sprintf("timeout /t 10 >NUL && \"%s\" /VERYSILENT", downloadPath), err)
 	}
 }

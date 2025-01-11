@@ -23,9 +23,8 @@ func (us *UpdaterService) StartDBConnectJob() error {
 		}
 
 		if s.UpdateStatus == server.UpdateStatusInProgress {
-			log.Println(s.Version, us.Version)
 			if s.Version == us.Version {
-				if err := us.Model.UpdateServerStatus(s.Version, s.Channel, server.UpdateStatusSuccess, s.UpdateMessage, s.UpdateWhen); err != nil {
+				if err := us.Model.UpdateServerStatus(s.Version, s.Channel, server.UpdateStatusSuccess, "", s.UpdateWhen); err != nil {
 					log.Printf("[ERROR]: could not save server status, reason: %v\n", err)
 				}
 			} else {
@@ -72,7 +71,7 @@ func (us *UpdaterService) StartDBConnectJob() error {
 
 				if s.UpdateStatus == server.UpdateStatusInProgress {
 					if s.Version == us.Version {
-						if err := us.Model.UpdateServerStatus(s.Version, s.Channel, server.UpdateStatusSuccess, s.UpdateMessage, s.UpdateWhen); err != nil {
+						if err := us.Model.UpdateServerStatus(s.Version, s.Channel, server.UpdateStatusSuccess, "", s.UpdateWhen); err != nil {
 							log.Printf("[ERROR]: could not save server status, reason: %v\n", err)
 						}
 					} else {
