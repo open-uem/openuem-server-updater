@@ -15,6 +15,7 @@ type UpdaterService struct {
 	NATSConnection              *nats.Conn
 	NATSConnectJob              gocron.Job
 	DBConnectJob                gocron.Job
+	ConfigJob                   gocron.Job
 	DBUrl                       string
 	NATSServers                 string
 	CACert                      string

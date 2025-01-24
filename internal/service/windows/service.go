@@ -17,7 +17,10 @@ func main() {
 	}
 
 	if err := us.ReadConfig(); err != nil {
-		log.Fatalf("[FATAL]: %v", err)
+		log.Printf("[ERROR]: %v", err)
+		if err := us.StartReadConfigJob(); err != nil {
+			log.Fatalf("[FATAL]: %v", err)
+		}
 	}
 
 	ws := utils.NewOpenUEMWindowsService()

@@ -95,6 +95,6 @@ func (us *UpdaterService) StartDBConnectJob() error {
 		log.Fatalf("[FATAL]: could not start the DB connect job: %v", err)
 		return err
 	}
-	log.Printf("[INFO]: new DB connect job has been scheduled every %d minutes", 2)
+	log.Printf("[INFO]: new DB connect job has been scheduled every %d seconds", 30)
 	return nil
 }
