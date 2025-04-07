@@ -1,27 +1,27 @@
 module github.com/open-uem/openuem-server-updater
 
-go 1.24.1
+go 1.24.2
 
 require (
-	entgo.io/ent v0.14.3
-	github.com/go-co-op/gocron/v2 v2.14.1
-	github.com/jackc/pgx/v5 v5.7.2
-	github.com/nats-io/nats.go v1.39.1
-	github.com/open-uem/ent v0.0.0-20250319090736-f3e013b53cca
-	github.com/open-uem/nats v0.0.0-20250319091503-aed56409cb42
-	github.com/open-uem/utils v0.0.0-20250214102216-df5a38667d0a
-	golang.org/x/sys v0.31.0
+	entgo.io/ent v0.14.4
+	github.com/go-co-op/gocron/v2 v2.16.1
+	github.com/jackc/pgx/v5 v5.7.4
+	github.com/nats-io/nats.go v1.41.0
+	github.com/open-uem/ent v0.0.0-20250407090036-eab9e96db9ec
+	github.com/open-uem/nats v0.0.0-20250407085943-422b32fe49f0
+	github.com/open-uem/utils v0.0.0-20250407085447-f3730b9ef3ac
+	golang.org/x/sys v0.32.0
 	gopkg.in/ini.v1 v1.67.0
 )
 
 require (
-	ariga.io/atlas v0.31.1-0.20250212144724-069be8033e83 // indirect
+	ariga.io/atlas v0.32.0 // indirect
 	github.com/agext/levenshtein v1.2.3 // indirect
 	github.com/apparentlymart/go-textseg/v15 v15.0.0 // indirect
 	github.com/bmatcuk/doublestar v1.3.4 // indirect
 	github.com/danieljoos/wincred v1.2.2 // indirect
-	github.com/go-openapi/inflect v0.21.0 // indirect
-	github.com/google/go-cmp v0.6.0 // indirect
+	github.com/go-openapi/inflect v0.21.2 // indirect
+	github.com/google/go-cmp v0.7.0 // indirect
 	github.com/google/uuid v1.6.0 // indirect
 	github.com/hashicorp/hcl/v2 v2.23.0 // indirect
 	github.com/jackc/pgpassfile v1.0.0 // indirect
@@ -33,12 +33,11 @@ require (
 	github.com/nats-io/nkeys v0.4.10 // indirect
 	github.com/nats-io/nuid v1.0.1 // indirect
 	github.com/robfig/cron/v3 v3.0.1 // indirect
-	github.com/zclconf/go-cty v1.16.0 // indirect
+	github.com/zclconf/go-cty v1.16.2 // indirect
 	github.com/zclconf/go-cty-yaml v1.1.0 // indirect
-	golang.org/x/crypto v0.36.0 // indirect
-	golang.org/x/exp v0.0.0-20250103183323-7d7fa50e5329 // indirect
-	golang.org/x/mod v0.23.0 // indirect
-	golang.org/x/sync v0.12.0 // indirect
-	golang.org/x/text v0.23.0 // indirect
-	golang.org/x/tools v0.30.0 // indirect
+	golang.org/x/crypto v0.37.0 // indirect
+	golang.org/x/mod v0.24.0 // indirect
+	golang.org/x/sync v0.13.0 // indirect
+	golang.org/x/text v0.24.0 // indirect
+	golang.org/x/tools v0.31.0 // indirect
 )
