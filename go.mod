@@ -6,16 +6,16 @@ require (
 	entgo.io/ent v0.14.4
 	github.com/go-co-op/gocron/v2 v2.16.1
 	github.com/jackc/pgx/v5 v5.7.4
-	github.com/nats-io/nats.go v1.41.0
-	github.com/open-uem/ent v0.0.0-20250407090036-eab9e96db9ec
-	github.com/open-uem/nats v0.0.0-20250407085943-422b32fe49f0
-	github.com/open-uem/utils v0.0.0-20250407085447-f3730b9ef3ac
+	github.com/nats-io/nats.go v1.41.2
+	github.com/open-uem/ent v0.0.0-20250424154135-51cb9044486a
+	github.com/open-uem/nats v0.0.0-20250424154048-a772eef61381
+	github.com/open-uem/utils v0.0.0-20250424154005-aa7e1df31e6c
 	golang.org/x/sys v0.32.0
 	gopkg.in/ini.v1 v1.67.0
 )
 
 require (
-	ariga.io/atlas v0.32.0 // indirect
+	ariga.io/atlas v0.32.1 // indirect
 	github.com/agext/levenshtein v1.2.3 // indirect
 	github.com/apparentlymart/go-textseg/v15 v15.0.0 // indirect
 	github.com/bmatcuk/doublestar v1.3.4 // indirect
@@ -30,7 +30,7 @@ require (
 	github.com/jonboulle/clockwork v0.5.0 // indirect
 	github.com/klauspost/compress v1.18.0 // indirect
 	github.com/mitchellh/go-wordwrap v1.0.1 // indirect
-	github.com/nats-io/nkeys v0.4.10 // indirect
+	github.com/nats-io/nkeys v0.4.11 // indirect
 	github.com/nats-io/nuid v1.0.1 // indirect
 	github.com/robfig/cron/v3 v3.0.1 // indirect
 	github.com/zclconf/go-cty v1.16.2 // indirect
@@ -39,5 +39,5 @@ require (
 	golang.org/x/mod v0.24.0 // indirect
 	golang.org/x/sync v0.13.0 // indirect
 	golang.org/x/text v0.24.0 // indirect
-	golang.org/x/tools v0.31.0 // indirect
+	golang.org/x/tools v0.32.0 // indirect
 )
