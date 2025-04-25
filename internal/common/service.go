@@ -62,6 +62,10 @@ func (us *UpdaterService) queueSubscribe() error {
 
 	ctx, us.JetstreamContextCancel = context.WithTimeout(context.Background(), 60*time.Minute)
 
+	if err := js.DeleteStream(ctx, "SERVERS_STREAM"); err == nil {
+		log.Println("[INFO]: old JetStream SERVERS_STREAM has been deleted")
+	}
+
 	streamConfig := jetstream.StreamConfig{
 		Name:      "SERVERS_STREAM_WORKQUEUE",
 		Subjects:  []string{"server.update." + hostname},
