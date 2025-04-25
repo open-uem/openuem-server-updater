@@ -62,6 +62,10 @@ func (us *UpdaterService) queueSubscribe() error {
 
 	ctx, us.JetstreamContextCancel = context.WithTimeout(context.Background(), 60*time.Minute)
 
+	if err := js.DeleteConsumer(ctx, "SERVERS_STREAM_WORKQUEUE", "server.update."+hostname); err == nil {
+		log.Println("[INFO]: old consumer for SERVERS_STREAM has been deleted")
+	}
+
 	if err := js.DeleteStream(ctx, "SERVERS_STREAM"); err == nil {
 		log.Println("[INFO]: old JetStream SERVERS_STREAM has been deleted")
 	}
@@ -79,6 +83,7 @@ func (us *UpdaterService) queueSubscribe() error {
 	}
 
 	consumerConfig := jetstream.ConsumerConfig{
+		Durable:        "server.update." + hostname,
 		AckWait:        10 * time.Minute,
 		AckPolicy:      jetstream.AckExplicitPolicy,
 		FilterSubjects: []string{"server.update." + hostname},
