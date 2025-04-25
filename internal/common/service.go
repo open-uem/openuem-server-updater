@@ -61,14 +61,20 @@ func (us *UpdaterService) queueSubscribe() error {
 	log.Println("[INFO]: JetStream has been instantiated")
 
 	ctx, us.JetstreamContextCancel = context.WithTimeout(context.Background(), 60*time.Minute)
-	s, err := js.Stream(ctx, "SERVERS_STREAM")
+
+	streamConfig := jetstream.StreamConfig{
+		Name:      "SERVERS_STREAM_WORKQUEUE",
+		Subjects:  []string{"server.update." + hostname},
+		Retention: jetstream.WorkQueuePolicy,
+	}
+
+	s, err := js.CreateOrUpdateStream(ctx, streamConfig)
 	if err != nil {
-		log.Printf("[ERROR]: could not instantiate SERVERS_STREAM, reason: %v\n", err)
+		log.Printf("[ERROR]: could not instantiate SERVERS_STREAM_WORKQUEUE, reason: %v\n", err)
 		return err
 	}
 
 	consumerConfig := jetstream.ConsumerConfig{
-		Durable:        "ServerUpdater" + hostname,
 		AckWait:        10 * time.Minute,
 		AckPolicy:      jetstream.AckExplicitPolicy,
 		FilterSubjects: []string{"server.update." + hostname},
