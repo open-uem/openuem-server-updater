@@ -62,7 +62,18 @@ func (us *UpdaterService) queueSubscribe() error {
 
 	ctx, us.JetstreamContextCancel = context.WithTimeout(context.Background(), 60*time.Minute)
 
-	s, err := js.Stream(ctx, "SERVERS_STREAM")
+	serverStreamConfig := jetstream.StreamConfig{
+		Name:     "SERVERS_STREAM",
+		Subjects: []string{"server.update.>"},
+	}
+
+	replicas := strings.Split(us.NATSServers, ",")
+
+	if len(replicas) > 1 {
+		serverStreamConfig.Replicas = len(replicas)
+	}
+
+	s, err := js.CreateOrUpdateStream(ctx, serverStreamConfig)
 	if err != nil {
 		log.Printf("[ERROR]: could not instantiate SERVERS_STREAM, reason: %v\n", err)
 		return err
