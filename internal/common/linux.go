@@ -152,7 +152,16 @@ func (us *UpdaterService) ReadConfig() error {
 }
 
 func (us *UpdaterService) ExecuteUpdate(data openuem_nats.OpenUEMUpdateRequest, msg jetstream.Msg, version string, channel server.Channel) {
-	msg.Ack()
+	if err := msg.Ack(); err != nil {
+		log.Printf("[ERROR]: could not ACK message, reason: %v", err)
+		return
+	}
+
+	if err := msg.Term(); err != nil {
+		log.Printf("[ERROR]: could not Terminate message, reason: %v", err)
+		return
+	}
+
 	if err := us.Model.UpdateServerStatus(data.Version, channel, server.UpdateStatusInProgress, "", time.Now()); err != nil {
 		log.Printf("[ERROR]: could not save server status, reason: %v", err)
 	}

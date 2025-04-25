@@ -99,8 +99,17 @@ func (us *UpdaterService) JetStreamUpdaterHandler(msg jetstream.Msg) {
 	data := openuem_nats.OpenUEMUpdateRequest{}
 
 	if err := json.Unmarshal(msg.Data(), &data); err != nil {
-		msg.Ack()
 		log.Printf("[ERROR]: could not unmarshal update request, reason: %v\n", err)
+
+		if err := msg.Ack(); err != nil {
+			log.Printf("[ERROR]: could not ACK message, reason: %v", err)
+			return
+		}
+
+		if err := msg.Term(); err != nil {
+			log.Printf("[ERROR]: could not Terminate message, reason: %v", err)
+			return
+		}
 		return
 	}
 
@@ -133,8 +142,18 @@ func (us *UpdaterService) JetStreamUpdaterHandler(msg jetstream.Msg) {
 		)
 
 		if err != nil {
-			msg.Ack()
 			log.Printf("[ERROR]: could not schedule the update task: %v\n", err)
+
+			if err := msg.Ack(); err != nil {
+				log.Printf("[ERROR]: could not ACK message, reason: %v", err)
+				return
+			}
+
+			if err := msg.Term(); err != nil {
+				log.Printf("[ERROR]: could not Terminate message, reason: %v", err)
+				return
+			}
+
 			if err := us.Model.UpdateServerStatus(data.Version, channel, server.UpdateStatusError, fmt.Sprintf("could not schedule the update task: %v", err), time.Now()); err != nil {
 				log.Printf("[ERROR]: could not save update server status: %v\n", err)
 			}
@@ -151,8 +170,18 @@ func (us *UpdaterService) JetStreamUpdaterHandler(msg jetstream.Msg) {
 			)
 
 			if err != nil {
-				msg.Ack()
 				log.Printf("[ERROR]: could not schedule the update task: %v\n", err)
+
+				if err := msg.Ack(); err != nil {
+					log.Printf("[ERROR]: could not ACK message, reason: %v", err)
+					return
+				}
+
+				if err := msg.Term(); err != nil {
+					log.Printf("[ERROR]: could not Terminate message, reason: %v", err)
+					return
+				}
+
 				if err := us.Model.UpdateServerStatus(data.Version, channel, server.UpdateStatusError, fmt.Sprintf("could not schedule the update task: %v", err), time.Now()); err != nil {
 					log.Printf("[ERROR]: could not save update server status: %v\n", err)
 				}
