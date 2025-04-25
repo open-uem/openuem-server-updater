@@ -62,23 +62,9 @@ func (us *UpdaterService) queueSubscribe() error {
 
 	ctx, us.JetstreamContextCancel = context.WithTimeout(context.Background(), 60*time.Minute)
 
-	if err := js.DeleteConsumer(ctx, "SERVERS_STREAM_WORKQUEUE", "ServerUpdater"+hostname); err == nil {
-		log.Println("[INFO]: old consumer for SERVERS_STREAM has been deleted")
-	}
-
-	if err := js.DeleteStream(ctx, "SERVERS_STREAM"); err == nil {
-		log.Println("[INFO]: old JetStream SERVERS_STREAM has been deleted")
-	}
-
-	streamConfig := jetstream.StreamConfig{
-		Name:      "SERVERS_STREAM_WORKQUEUE",
-		Subjects:  []string{"server.update." + hostname},
-		Retention: jetstream.WorkQueuePolicy,
-	}
-
-	s, err := js.CreateOrUpdateStream(ctx, streamConfig)
+	s, err := js.Stream(ctx, "SERVERS_STREAM")
 	if err != nil {
-		log.Printf("[ERROR]: could not instantiate SERVERS_STREAM_WORKQUEUE, reason: %v\n", err)
+		log.Printf("[ERROR]: could not instantiate SERVERS_STREAM, reason: %v\n", err)
 		return err
 	}
 
