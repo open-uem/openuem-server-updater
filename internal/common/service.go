@@ -63,8 +63,9 @@ func (us *UpdaterService) queueSubscribe() error {
 	ctx, us.JetstreamContextCancel = context.WithTimeout(context.Background(), 60*time.Minute)
 
 	serverStreamConfig := jetstream.StreamConfig{
-		Name:     "SERVERS_STREAM",
-		Subjects: []string{"server.update.>"},
+		Name:      "SERVERS_STREAM",
+		Subjects:  []string{"server.update.>"},
+		Retention: jetstream.InterestPolicy,
 	}
 
 	replicas := strings.Split(us.NATSServers, ",")
