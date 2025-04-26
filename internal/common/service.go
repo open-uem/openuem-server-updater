@@ -117,11 +117,6 @@ func (us *UpdaterService) JetStreamUpdaterHandler(msg jetstream.Msg) {
 			log.Printf("[ERROR]: could not ACK message, reason: %v", err)
 			return
 		}
-
-		if err := msg.Term(); err != nil {
-			log.Printf("[ERROR]: could not Terminate message, reason: %v", err)
-			return
-		}
 		return
 	}
 
@@ -158,12 +153,6 @@ func (us *UpdaterService) JetStreamUpdaterHandler(msg jetstream.Msg) {
 
 			if err := msg.Ack(); err != nil {
 				log.Printf("[ERROR]: could not ACK message, reason: %v", err)
-				return
-			}
-
-			if err := msg.Term(); err != nil {
-				log.Printf("[ERROR]: could not Terminate message, reason: %v", err)
-				return
 			}
 
 			if err := us.Model.UpdateServerStatus(data.Version, channel, server.UpdateStatusError, fmt.Sprintf("could not schedule the update task: %v", err), time.Now()); err != nil {
@@ -186,11 +175,6 @@ func (us *UpdaterService) JetStreamUpdaterHandler(msg jetstream.Msg) {
 
 				if err := msg.Ack(); err != nil {
 					log.Printf("[ERROR]: could not ACK message, reason: %v", err)
-					return
-				}
-
-				if err := msg.Term(); err != nil {
-					log.Printf("[ERROR]: could not Terminate message, reason: %v", err)
 					return
 				}
 

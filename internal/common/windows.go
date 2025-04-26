@@ -150,11 +150,6 @@ func (us *UpdaterService) ExecuteUpdate(data openuem_nats.OpenUEMUpdateRequest, 
 			return
 		}
 
-		if err := msg.Term(); err != nil {
-			log.Printf("[ERROR]: could not Terminate message, reason: %v", err)
-			return
-		}
-
 		if err := us.Model.UpdateServerStatus(data.Version, channel, server.UpdateStatusError, fmt.Sprintf("could not get working directory, reason: %v", err), time.Now()); err != nil {
 			log.Printf("[ERROR]: could not save server status, reason: %v", err)
 		}
@@ -173,12 +168,6 @@ func (us *UpdaterService) ExecuteUpdate(data openuem_nats.OpenUEMUpdateRequest, 
 
 	if err := msg.Ack(); err != nil {
 		log.Printf("[ERROR]: could not ACK message, reason: %v", err)
-		return
-	}
-
-	if err := msg.Term(); err != nil {
-		log.Printf("[ERROR]: could not Terminate message, reason: %v", err)
-		return
 	}
 
 	if err := us.Model.UpdateServerStatus(data.Version, channel, server.UpdateStatusInProgress, "", time.Now()); err != nil {
