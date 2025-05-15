@@ -10,6 +10,7 @@ require (
 	github.com/open-uem/ent v0.0.0-20250424154135-51cb9044486a
 	github.com/open-uem/nats v0.0.0-20250424154048-a772eef61381
 	github.com/open-uem/utils v0.0.0-20250424154005-aa7e1df31e6c
+	github.com/zcalusic/sysinfo v1.1.3
 	golang.org/x/sys v0.32.0
 	gopkg.in/ini.v1 v1.67.0
 )

@@ -5,6 +5,7 @@ package common
 import (
 	"fmt"
 	"log"
+	"os"
 	"os/exec"
 	"time"
 
@@ -13,6 +14,7 @@ import (
 	"github.com/open-uem/ent/server"
 	openuem_nats "github.com/open-uem/nats"
 	"github.com/open-uem/utils"
+	"github.com/zcalusic/sysinfo"
 	"gopkg.in/ini.v1"
 )
 
@@ -152,6 +154,10 @@ func (us *UpdaterService) ReadConfig() error {
 }
 
 func (us *UpdaterService) ExecuteUpdate(data openuem_nats.OpenUEMUpdateRequest, msg jetstream.Msg, version string, channel server.Channel) {
+	var cmd *exec.Cmd
+
+	operatingSystem := GetOSVendor()
+
 	if err := msg.Ack(); err != nil {
 		log.Printf("[ERROR]: could not ACK message, reason: %v", err)
 		return
@@ -161,17 +167,139 @@ func (us *UpdaterService) ExecuteUpdate(data openuem_nats.OpenUEMUpdateRequest, 
 		log.Printf("[ERROR]: could not save server status, reason: %v", err)
 	}
 
-	cmd := exec.Command("/bin/sh", "-c", fmt.Sprintf("echo \"%s\" | at now +1 minute", "sudo apt update -y && sudo apt install -y --allow-downgrades openuem-server="+data.Version))
-	err := cmd.Start()
-	if err != nil {
-		log.Printf("[ERROR]: could not run %s command, reason: %v", cmd.String(), err)
-		return
-	}
-	log.Println("[INFO]: update command has been started: ", cmd.String())
+	switch operatingSystem {
+	case "debian", "ubuntu", "linuxmint":
+		cmd = exec.Command("/bin/sh", "-c", fmt.Sprintf("echo \"%s\" | at now +1 minute", "sudo apt update -y && sudo apt install -y --allow-downgrades openuem-server="+data.Version))
+		err := cmd.Start()
+		if err != nil {
+			log.Printf("[ERROR]: could not run %s command, reason: %v", cmd.String(), err)
+			return
+		}
+		log.Println("[INFO]: update command has been started: ", cmd.String())
 
-	if err := cmd.Wait(); err != nil {
-		log.Printf("[ERROR]: Command finished with error: %v", err)
+		if err := cmd.Wait(); err != nil {
+			log.Printf("[ERROR]: Command finished with error: %v", err)
+			return
+		}
+		log.Println("[INFO]: update command has been programmed: ", cmd.String())
+	case "fedora", "almalinux", "redhat", "rocky":
+		if us.NATSInstalled {
+			cmd = exec.Command("/bin/sh", "-c", fmt.Sprintf("echo \"%s\" | at now +1 minute", "sudo dnf install --allow-downgrade --refresh -y openuem-nats-service-"+data.Version))
+			err := cmd.Start()
+			if err != nil {
+				log.Printf("[ERROR]: could not run %s command, reason: %v", cmd.String(), err)
+				return
+			}
+			log.Println("[INFO]: update command has been started: ", cmd.String())
+
+			if err := cmd.Wait(); err != nil {
+				log.Printf("[ERROR]: Command finished with error: %v", err)
+				return
+			}
+			log.Println("[INFO]: update command has been programmed: ", cmd.String())
+		}
+		if us.OCSPResponderInstalled {
+			cmd = exec.Command("/bin/sh", "-c", fmt.Sprintf("echo \"%s\" | at now +1 minute", "sudo dnf install --allow-downgrade --refresh -y openuem-ocsp-responder-"+data.Version))
+			err := cmd.Start()
+			if err != nil {
+				log.Printf("[ERROR]: could not run %s command, reason: %v", cmd.String(), err)
+				return
+			}
+			log.Println("[INFO]: update command has been started: ", cmd.String())
+
+			if err := cmd.Wait(); err != nil {
+				log.Printf("[ERROR]: Command finished with error: %v", err)
+				return
+			}
+			log.Println("[INFO]: update command has been programmed: ", cmd.String())
+		}
+		if us.AgentWorkerInstalled {
+			cmd = exec.Command("/bin/sh", "-c", fmt.Sprintf("echo \"%s\" | at now +1 minute", "sudo dnf install --allow-downgrade --refresh -y openuem-agent-worker-"+data.Version))
+			err := cmd.Start()
+			if err != nil {
+				log.Printf("[ERROR]: could not run %s command, reason: %v", cmd.String(), err)
+				return
+			}
+			log.Println("[INFO]: update command has been started: ", cmd.String())
+
+			if err := cmd.Wait(); err != nil {
+				log.Printf("[ERROR]: Command finished with error: %v", err)
+				return
+			}
+			log.Println("[INFO]: update command has been programmed: ", cmd.String())
+		}
+		if us.CertManagerWorkerInstalled {
+			cmd = exec.Command("/bin/sh", "-c", fmt.Sprintf("echo \"%s\" | at now +1 minute", "sudo dnf install --allow-downgrade --refresh -y openuem-cert-manager-worker-"+data.Version))
+			err := cmd.Start()
+			if err != nil {
+				log.Printf("[ERROR]: could not run %s command, reason: %v", cmd.String(), err)
+				return
+			}
+			log.Println("[INFO]: update command has been started: ", cmd.String())
+
+			if err := cmd.Wait(); err != nil {
+				log.Printf("[ERROR]: Command finished with error: %v", err)
+				return
+			}
+			log.Println("[INFO]: update command has been programmed: ", cmd.String())
+		}
+		if us.NotificationWorkerInstalled {
+			cmd = exec.Command("/bin/sh", "-c", fmt.Sprintf("echo \"%s\" | at now +1 minute", "sudo dnf install --allow-downgrade --refresh -y openuem-notification-worker-"+data.Version))
+			err := cmd.Start()
+			if err != nil {
+				log.Printf("[ERROR]: could not run %s command, reason: %v", cmd.String(), err)
+				return
+			}
+			log.Println("[INFO]: update command has been started: ", cmd.String())
+
+			if err := cmd.Wait(); err != nil {
+				log.Printf("[ERROR]: Command finished with error: %v", err)
+				return
+			}
+			log.Println("[INFO]: update command has been programmed: ", cmd.String())
+		}
+		if us.ConsoleInstalled {
+			cmd = exec.Command("/bin/sh", "-c", fmt.Sprintf("echo \"%s\" | at now +1 minute", "sudo dnf install --allow-downgrade --refresh -y openuem-console-"+data.Version))
+			err := cmd.Start()
+			if err != nil {
+				log.Printf("[ERROR]: could not run %s command, reason: %v", cmd.String(), err)
+				return
+			}
+			log.Println("[INFO]: update command has been started: ", cmd.String())
+
+			if err := cmd.Wait(); err != nil {
+				log.Printf("[ERROR]: Command finished with error: %v", err)
+				return
+			}
+			log.Println("[INFO]: update command has been programmed: ", cmd.String())
+		}
+		// And update cert-manager if binary exists
+		_, err := os.Stat("/usr/bin/openuem-cert-manager")
+		if err == nil {
+			cmd = exec.Command("/bin/sh", "-c", fmt.Sprintf("echo \"%s\" | at now +1 minute", "sudo dnf install --allow-downgrade --refresh -y openuem-cert-manager-"+data.Version))
+			err := cmd.Start()
+			if err != nil {
+				log.Printf("[ERROR]: could not run %s command, reason: %v", cmd.String(), err)
+				return
+			}
+			log.Println("[INFO]: update command has been started: ", cmd.String())
+
+			if err := cmd.Wait(); err != nil {
+				log.Printf("[ERROR]: Command finished with error: %v", err)
+				return
+			}
+			log.Println("[INFO]: update command has been programmed: ", cmd.String())
+		}
+	default:
 		return
 	}
-	log.Println("[INFO]: update command has been programmed: ", cmd.String())
+
+}
+
+func GetOSVendor() string {
+	var si sysinfo.SysInfo
+
+	si.GetSysInfo()
+
+	return si.OS.Vendor
 }
