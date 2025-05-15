@@ -7,8 +7,8 @@ require (
 	github.com/go-co-op/gocron/v2 v2.16.1
 	github.com/jackc/pgx/v5 v5.7.4
 	github.com/nats-io/nats.go v1.41.2
-	github.com/open-uem/ent v0.0.0-20250424154135-51cb9044486a
-	github.com/open-uem/nats v0.0.0-20250424154048-a772eef61381
+	github.com/open-uem/ent v0.0.0-20250513061100-3deef4bb3081
+	github.com/open-uem/nats v0.0.0-20250514125548-3bae96c53080
 	github.com/open-uem/utils v0.0.0-20250424154005-aa7e1df31e6c
 	github.com/zcalusic/sysinfo v1.1.3
 	golang.org/x/sys v0.32.0
