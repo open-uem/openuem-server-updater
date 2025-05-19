@@ -273,8 +273,24 @@ func (us *UpdaterService) ExecuteUpdate(data openuem_nats.OpenUEMUpdateRequest, 
 			}
 			log.Println("[INFO]: update command has been programmed: ", cmd.String())
 		}
+
+		// Update server-updater
+		cmd = exec.Command("/bin/sh", "-c", fmt.Sprintf("echo \"%s\" | at now +1 minute", "sudo dnf install --allow-downgrade --refresh -y openuem-server-updater-"+data.Version))
+		err := cmd.Start()
+		if err != nil {
+			log.Printf("[ERROR]: could not run %s command, reason: %v", cmd.String(), err)
+			return
+		}
+		log.Println("[INFO]: update command has been started: ", cmd.String())
+
+		if err := cmd.Wait(); err != nil {
+			log.Printf("[ERROR]: Command finished with error: %v", err)
+			return
+		}
+		log.Println("[INFO]: update command has been programmed: ", cmd.String())
+
 		// And update cert-manager if binary exists
-		_, err := os.Stat("/usr/bin/openuem-cert-manager")
+		_, err = os.Stat("/usr/bin/openuem-cert-manager")
 		if err == nil {
 			cmd = exec.Command("/bin/sh", "-c", fmt.Sprintf("echo \"%s\" | at now +1 minute", "sudo dnf install --allow-downgrade --refresh -y openuem-cert-manager-"+data.Version))
 			err := cmd.Start()
