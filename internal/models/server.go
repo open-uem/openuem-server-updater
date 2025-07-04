@@ -4,6 +4,7 @@ import (
 	"context"
 	"os"
 	"runtime"
+	"strings"
 	"time"
 
 	openuem_ent "github.com/open-uem/ent"
@@ -15,6 +16,10 @@ func (m *Model) SetServer(version string, channel server.Channel) error {
 	if err != nil {
 		return err
 	}
+
+	// Fix #1 hostname must not contain dots and domain
+	hostnameParts := strings.Split(hostname, ".")
+	hostname = hostnameParts[0]
 
 	exists := true
 	s, err := m.Client.Server.Query().Where(server.Hostname(hostname), server.Arch(runtime.GOARCH), server.Os(runtime.GOOS), server.ChannelEQ(channel)).Only(context.Background())
@@ -36,6 +41,9 @@ func (m *Model) UpdateServerStatus(version string, channel server.Channel, statu
 	if err != nil {
 		return err
 	}
+	// Fix #1 hostname must not contain dots and domain
+	hostnameParts := strings.Split(hostname, ".")
+	hostname = hostnameParts[0]
 
 	s, err := m.Client.Server.Query().Where(server.Hostname(hostname), server.Arch(runtime.GOARCH), server.Os(runtime.GOOS), server.ChannelEQ(channel)).Only(context.Background())
 	if err != nil {
@@ -60,6 +68,9 @@ func (m *Model) GetServerStatus() (*openuem_ent.Server, error) {
 	if err != nil {
 		return nil, err
 	}
+	// Fix #1 hostname must not contain dots and domain
+	hostnameParts := strings.Split(hostname, ".")
+	hostname = hostnameParts[0]
 
 	server, err := m.Client.Server.Query().Where(server.Hostname(hostname)).Only(context.Background())
 	if err != nil {

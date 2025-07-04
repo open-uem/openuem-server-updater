@@ -53,7 +53,7 @@ func (us *UpdaterService) queueSubscribe() error {
 		return err
 	}
 
-	// Issue #7 prevent hostname to include domain accidentally
+	// Issue #2 prevent hostname to include domain accidentally
 	hostnameParts := strings.Split(hostname, ".")
 	hostname = hostnameParts[0]
 

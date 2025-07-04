@@ -3,6 +3,7 @@ package common
 import (
 	"context"
 	"os"
+	"strings"
 
 	"github.com/open-uem/ent/server"
 )
@@ -12,6 +13,10 @@ func (us *UpdaterService) SetInstalledComponents() error {
 	if err != nil {
 		return err
 	}
+
+	// Fix #1 hostname must not contain dots and domain
+	hostnameParts := strings.Split(hostname, ".")
+	hostname = hostnameParts[0]
 
 	return us.Model.Client.Server.Update().
 		SetOcspComponent(us.OCSPResponderInstalled).
