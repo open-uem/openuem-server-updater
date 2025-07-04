@@ -27,7 +27,6 @@ func (us *UpdaterService) StartReadConfigJob() error {
 				if err := us.TaskScheduler.RemoveJob(us.ConfigJob.ID()); err != nil {
 					return
 				}
-				return
 			},
 		),
 	)
