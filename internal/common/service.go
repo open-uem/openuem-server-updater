@@ -53,6 +53,10 @@ func (us *UpdaterService) queueSubscribe() error {
 		return err
 	}
 
+	// Issue #7 prevent hostname to include domain accidentally
+	hostnameParts := strings.Split(hostname, ".")
+	hostname = hostnameParts[0]
+
 	js, err := jetstream.New(us.NATSConnection)
 	if err != nil {
 		log.Printf("[ERROR]: could not instantiate JetStream: %s", err.Error())
