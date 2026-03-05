@@ -12,7 +12,7 @@ import (
 func (us *UpdaterService) StartNATSConnectJob(queueSubscribe func() error) error {
 	var err error
 
-	us.NATSConnection, err = openuem_nats.ConnectWithNATS(us.NATSServers, us.UpdaterCert, us.UpdaterKey, us.CACert)
+	us.NATSConnection, err = openuem_nats.ConnectWithNATS(us.NATSServers, us.UpdaterCert, us.UpdaterKey, us.CACert, "")
 	if err == nil {
 		if err := queueSubscribe(); err == nil {
 			return nil
@@ -27,7 +27,7 @@ func (us *UpdaterService) StartNATSConnectJob(queueSubscribe func() error) error
 		gocron.NewTask(
 			func() {
 				if us.NATSConnection == nil {
-					us.NATSConnection, err = openuem_nats.ConnectWithNATS(us.NATSServers, us.UpdaterCert, us.UpdaterKey, us.CACert)
+					us.NATSConnection, err = openuem_nats.ConnectWithNATS(us.NATSServers, us.UpdaterCert, us.UpdaterKey, us.CACert, "")
 					if err != nil {
 						log.Printf("[ERROR]: could not connect to NATS %v", err)
 						return
