@@ -1,15 +1,15 @@
 module github.com/open-uem/openuem-server-updater
 
-go 1.25.5
+go 1.26.0
 
 require (
 	entgo.io/ent v0.14.5
 	github.com/go-co-op/gocron/v2 v2.17.0
 	github.com/jackc/pgx/v5 v5.7.6
 	github.com/nats-io/nats.go v1.47.0
-	github.com/open-uem/ent v0.0.0-20251220072124-b7c9bbc5c91f
-	github.com/open-uem/nats v0.0.0-20251220104614-efae26e98557
-	github.com/open-uem/utils v0.0.0-20251221104611-c55d64529212
+	github.com/open-uem/ent v0.0.0-20260304131017-5ae1c9142798
+	github.com/open-uem/nats v0.11.1-0.20260305131222-7d78a688fd33
+	github.com/open-uem/utils v0.0.0-20260305135023-24f298daa053
 	github.com/zcalusic/sysinfo v1.1.3
 	golang.org/x/sys v0.37.0
 	gopkg.in/ini.v1 v1.67.0
